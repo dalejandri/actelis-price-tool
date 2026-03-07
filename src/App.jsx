@@ -690,7 +690,7 @@ export default function QuoteApp(){
   const cg=useMemo(()=>{const g={};lines.forEach(l=>{const k=l.cat.split(" ")[0];(g[k]=g[k]||[]).push(l);});return g;},[lines]);
 
   const N="#0B1D3A",A="#D97706",B="#E2E8F0",T="#1A2035",M="#64748B";
-  const inp={width:"100%",padding:"7px 9px",border:`1px solid ${B}`,borderRadius:5,fontSize:12,color:T,background:"white",outline:"none",boxSizing:"border-box",fontFamily:"inherit"};
+  const inp={width:"100%",padding:"9px 11px",border:`1px solid ${B}`,borderRadius:5,fontSize:14,color:T,background:"white",outline:"none",boxSizing:"border-box",fontFamily:"inherit"};
 
   return(
     <div style={{fontFamily:"'DM Sans','Segoe UI',sans-serif",background:"#F4F6FA",minHeight:"100vh",color:T,fontSize:13}}>
@@ -704,18 +704,21 @@ export default function QuoteApp(){
       )}
 
       {/* NAV */}
-      <div style={{background:N,height:50,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px",boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{background:A,borderRadius:4,padding:"2px 8px"}}><span style={{color:"white",fontWeight:800,fontSize:11,letterSpacing:"0.08em"}}>ACTELIS</span></div>
-          <span style={{color:"#64748B",fontSize:11,borderLeft:"1px solid #1E3A5F",paddingLeft:10}}>Price Quote Tool</span>
-          <div style={{padding:"2px 8px",borderRadius:4,background:(SC[stat]||"#888")+"22",color:SC[stat]||"#888",fontSize:10,fontWeight:700,border:`1px solid ${(SC[stat]||"#888")}44`}}>{stat}</div>
+      <div style={{background:N,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <img src="https://actelis.com/wp-content/uploads/2021/10/a_logo-1.gif"
+            alt="Actelis" style={{height:38,objectFit:"contain",display:"block"}} />
+          <div style={{borderLeft:"1px solid #1E3A5F",paddingLeft:16}}>
+            <div style={{color:"white",fontWeight:700,fontSize:15,lineHeight:1.2}}>Price Quote Tool</div>
+            <div style={{padding:"2px 8px",borderRadius:4,background:(SC[stat]||"#888")+"33",color:SC[stat]||"#888",fontSize:15,fontWeight:700,border:`1px solid ${(SC[stat]||"#888")}55`,display:"inline-block",marginTop:2}}>{stat}</div>
+          </div>
         </div>
-        <div style={{display:"flex",gap:6}}>
+        <div style={{display:"flex",gap:8}}>
           {[["📥 Import PDF",false],["⬇ Excel",false],["🔗 HubSpot",false]].map(([l,p])=>(
-            <button key={l} style={{padding:"4px 10px",borderRadius:5,fontSize:10,fontWeight:700,cursor:"pointer",background:p?A:"#1E3A5F",color:p?"white":"#94A3B8",border:"none"}}>{l}</button>
+            <button key={l} style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:p?A:"#1E3A5F",color:p?"white":"#94A3B8",border:"none"}}>{l}</button>
           ))}
           <button onClick={exportPdf} disabled={exporting}
-            style={{padding:"4px 12px",borderRadius:5,fontSize:10,fontWeight:700,cursor:exporting?"wait":"pointer",
+            style={{padding:"6px 16px",borderRadius:5,fontSize:14,fontWeight:700,cursor:exporting?"wait":"pointer",
               background:exporting?"#92400E":"#D97706",color:"white",border:"none",opacity:exporting?0.8:1,
               display:"flex",alignItems:"center",gap:4}}>
             {exporting ? "⏳ Generating..." : "⬇ Export PDF"}
@@ -744,20 +747,20 @@ export default function QuoteApp(){
                 ["",(
                   <div style={{display:"flex",alignItems:"center",gap:7,marginTop:16}}>
                     <TogM v={dr} set={setDr}/>
-                    <span style={{fontSize:11,color:dr?A:M,fontWeight:dr?600:400}}>
+                    <span style={{fontSize:15,color:dr?A:M,fontWeight:dr?600:400}}>
                       Deal Registration {dr&&isNA&&<span style={{color:"#059669",fontSize:10}}>+7% active</span>}
                     </span>
                   </div>
                 ),""]
               ].map(([lb,el,rq],i)=>(
                 <div key={i}>
-                  {lb&&<div style={{fontSize:9,fontWeight:700,color:M,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>{lb}{rq&&<span style={{color:"#EF4444",marginLeft:2}}>*</span>}</div>}
+                  {lb&&<div style={{fontSize:15,fontWeight:700,color:M,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>{lb}{rq&&<span style={{color:"#EF4444",marginLeft:2}}>*</span>}</div>}
                   {el}
                 </div>
               ))}
             </div>
             <div style={{marginTop:8}}>
-              <div style={{fontSize:9,fontWeight:700,color:M,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>Comments</div>
+              <div style={{fontSize:15,fontWeight:700,color:M,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Comments</div>
               <textarea value={cmts} onChange={e=>setCmts(e.target.value)} placeholder="Comments for the quote output..."
                 style={{...inp,minHeight:44,resize:"vertical"}}/>
             </div>
@@ -767,7 +770,7 @@ export default function QuoteApp(){
           <Panel title="Line Items" icon="📦" actions={
             <div style={{display:"flex",gap:5}}>
               {[["hw","Hardware (A/B/C)"],["svc","Services (D)"]].map(([k,l])=>(
-                <button key={k} onClick={()=>{setTab(k);setSrch("");}} style={{padding:"2px 9px",borderRadius:4,border:"none",cursor:"pointer",fontSize:10,fontWeight:700,background:tab===k?N:"transparent",color:tab===k?"white":M}}>{l}</button>
+                <button key={k} onClick={()=>{setTab(k);setSrch("");}} style={{padding:"2px 9px",borderRadius:4,border:"none",cursor:"pointer",fontSize:14,fontWeight:700,background:tab===k?N:"transparent",color:tab===k?"white":M}}>{l}</button>
               ))}
             </div>
           }>
@@ -782,14 +785,14 @@ export default function QuoteApp(){
                     return(
                       <div key={p.pn} onClick={()=>addItem(p)} style={{padding:"8px 12px",cursor:"pointer",borderBottom:`1px solid #F8FAFC`,display:"grid",gridTemplateColumns:"108px 1fr auto",gap:8,alignItems:"center"}}
                         onMouseEnter={e=>e.currentTarget.style.background="#F8FAFC"} onMouseLeave={e=>e.currentTarget.style.background="white"}>
-                        <code style={{fontSize:10,color:N,fontWeight:700}}>{p.pn}</code>
+                        <code style={{fontSize:14,color:N,fontWeight:700}}>{p.pn}</code>
                         <div>
-                          <div style={{fontSize:11,color:T}}>{p.desc}</div>
-                          <div style={{fontSize:9,color:"#94A3B8",marginTop:1}}>{p.cat}</div>
+                          <div style={{fontSize:15,color:T}}>{p.desc}</div>
+                          <div style={{fontSize:15,color:"#94A3B8",marginTop:1}}>{p.cat}</div>
                         </div>
                         <div style={{textAlign:"right",whiteSpace:"nowrap"}}>
-                          <div style={{fontSize:11,fontWeight:700,color:N}}>{p.price?$M(p.price):p.lpString?.substring(0,18)||"—"}</div>
-                          {d>0&&p.price>0&&<div style={{fontSize:9,color:"#10B981"}}>-{PM(d)}</div>}
+                          <div style={{fontSize:15,fontWeight:700,color:N}}>{p.price?$M(p.price):p.lpString?.substring(0,18)||"—"}</div>
+                          {d>0&&p.price>0&&<div style={{fontSize:15,color:"#10B981"}}>-{PM(d)}</div>}
                         </div>
                       </div>
                     );
@@ -797,7 +800,7 @@ export default function QuoteApp(){
                 </div>
               )}
               {drop&&srch&&res.length===0&&(
-                <div style={{position:"absolute",zIndex:200,top:"100%",left:0,right:0,background:"white",border:`1px solid ${B}`,borderRadius:7,padding:12,textAlign:"center",color:"#94A3B8",fontSize:11,marginTop:2}}>
+                <div style={{position:"absolute",zIndex:200,top:"100%",left:0,right:0,background:"white",border:`1px solid ${B}`,borderRadius:7,padding:12,textAlign:"center",color:"#94A3B8",fontSize:15,marginTop:2}}>
                   No results for "{srch}"
                 </div>
               )}
@@ -807,11 +810,11 @@ export default function QuoteApp(){
               <div style={{textAlign:"center",padding:"30px 0",color:"#94A3B8"}}>
                 <div style={{fontSize:26,marginBottom:5}}>📋</div>
                 <div style={{fontSize:12}}>Search above to add products manually</div>
-                <div style={{fontSize:10,marginTop:2}}>or click <strong>⚡ Node Configurator</strong> to auto-build a BOM</div>
+                <div style={{fontSize:14,marginTop:2}}>or click <strong>⚡ Node Configurator</strong> to auto-build a BOM</div>
               </div>
             ):(
               <div>
-                <div style={{display:"grid",gridTemplateColumns:"108px 1fr 62px 86px 80px 94px 22px",gap:5,padding:"4px 5px",background:"#F1F5F9",borderRadius:4,fontSize:9,fontWeight:700,color:M,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:2}}>
+                <div style={{display:"grid",gridTemplateColumns:"108px 1fr 62px 86px 80px 94px 22px",gap:5,padding:"4px 5px",background:"#F1F5F9",borderRadius:4,fontSize:15,fontWeight:700,color:M,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:3}}>
                   <span>Part #</span><span>Description</span><span>Qty</span><span>List</span><span>Disc%</span><span style={{textAlign:"right"}}>Customer $</span><span/>
                 </div>
                 {lines.map(l=>{
@@ -820,23 +823,23 @@ export default function QuoteApp(){
                   return(
                     <div key={l.id} style={{display:"grid",gridTemplateColumns:"108px 1fr 62px 86px 80px 94px 22px",gap:5,padding:"6px 5px",borderBottom:`1px solid #F8FAFC`,alignItems:"center"}}
                       onMouseEnter={e=>e.currentTarget.style.background="#FAFBFF"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                      <code style={{fontSize:9,color:N,fontWeight:700}}>{l.pn}</code>
+                      <code style={{fontSize:15,color:N,fontWeight:700}}>{l.pn}</code>
                       <div>
-                        <div style={{fontSize:10,color:T,lineHeight:1.3}}>{l.desc}</div>
-                        <div style={{fontSize:8,color:"#94A3B8",marginTop:1}}>{l.site?<span style={{color:"#3B82F6",fontWeight:600}}>📍{l.site} · </span>:""}{l.cat}</div>
+                        <div style={{fontSize:14,color:T,lineHeight:1.3}}>{l.desc}</div>
+                        <div style={{fontSize:14,color:"#94A3B8",marginTop:1}}>{l.site?<span style={{color:"#3B82F6",fontWeight:600}}>📍{l.site} · </span>:""}{l.cat}</div>
                       </div>
                       <input type="number" value={l.qty} min={1} onChange={e=>upd(l.id,"qty",Math.max(1,parseInt(e.target.value)||1))}
-                        style={{width:"100%",padding:"2px 4px",border:`1px solid ${B}`,borderRadius:3,fontSize:10,textAlign:"center"}}/>
-                      <span style={{fontSize:10,color:M,textAlign:"right"}}>{$M(l.listPrice)}</span>
+                        style={{width:"100%",padding:"2px 4px",border:`1px solid ${B}`,borderRadius:3,fontSize:14,textAlign:"center"}}/>
+                      <span style={{fontSize:14,color:M,textAlign:"right"}}>{$M(l.listPrice)}</span>
                       <div style={{display:"flex",alignItems:"center",gap:2}}>
                         <input type="number" value={(l.discount*100).toFixed(1)} min={0} max={100} step={0.5}
                           onChange={e=>upd(l.id,"discount",Math.min(1,Math.max(0,(parseFloat(e.target.value)||0)/100)))}
-                          style={{width:40,padding:"2px 3px",border:`1px solid ${ov?"#D97706":B}`,borderRadius:3,fontSize:10,textAlign:"center",background:ov?"#FFFBEB":"white"}}/>
-                        <span style={{fontSize:8,color:M}}>%</span>
-                        {ov&&<span style={{fontSize:8,color:A}} title="Overridden">✎</span>}
+                          style={{width:40,padding:"2px 3px",border:`1px solid ${ov?"#D97706":B}`,borderRadius:3,fontSize:14,textAlign:"center",background:ov?"#FFFBEB":"white"}}/>
+                        <span style={{fontSize:15,color:M}}>%</span>
+                        {ov&&<span style={{fontSize:15,color:A}} title="Overridden">✎</span>}
                       </div>
-                      <span style={{fontSize:11,fontWeight:700,color:N,textAlign:"right"}}>{$M(cp)}</span>
-                      <button onClick={()=>rm(l.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#CBD5E1",fontSize:13,padding:0}}
+                      <span style={{fontSize:15,fontWeight:700,color:N,textAlign:"right"}}>{$M(cp)}</span>
+                      <button onClick={()=>rm(l.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#CBD5E1",fontSize:15,padding:0}}
                         onMouseEnter={e=>e.target.style.color="#EF4444"} onMouseLeave={e=>e.target.style.color="#CBD5E1"}>×</button>
                     </div>
                   );
@@ -845,7 +848,7 @@ export default function QuoteApp(){
                   <div style={{marginTop:6,borderTop:"1px dashed #E2E8F0",paddingTop:5}}>
                     {Object.entries(cg).map(([c,ls])=>{
                       const s=ls.reduce((x,l)=>x+l.listPrice*l.qty*(1-l.discount),0);
-                      return<div key={c} style={{display:"flex",justifyContent:"space-between",padding:"1px 5px",fontSize:10,color:M}}>
+                      return<div key={c} style={{display:"flex",justifyContent:"space-between",padding:"1px 5px",fontSize:14,color:M}}>
                         <span>Type {c} subtotal</span><span style={{fontWeight:700}}>{$M(s)}</span>
                       </div>;
                     })}
@@ -859,10 +862,10 @@ export default function QuoteApp(){
               onMouseEnter={e=>e.currentTarget.style.background="linear-gradient(135deg,#FEF3C7,#FDE68A)"}
               onMouseLeave={e=>e.currentTarget.style.background="linear-gradient(135deg,#FFFBEB,#FEF3C7)"}>
               <div>
-                <div style={{fontSize:12,fontWeight:800,color:"#92400E"}}>⚡ Node Configurator Wizard</div>
-                <div style={{fontSize:10,color:"#B45309",marginTop:2}}>Auto-build complete BOM for PTP ML600 · PTMP GL800 · GL900 · GL9000 · ML230/ML2300</div>
+                <div style={{fontSize:14,fontWeight:800,color:"#92400E"}}>⚡ Node Configurator Wizard</div>
+                <div style={{fontSize:14,color:"#B45309",marginTop:2}}>Auto-build complete BOM for PTP ML600 · PTMP GL800 · GL900 · GL9000 · ML230/ML2300</div>
               </div>
-              <div style={{background:A,color:"white",padding:"5px 14px",borderRadius:6,fontSize:11,fontWeight:700,whiteSpace:"nowrap",flexShrink:0}}>
+              <div style={{background:A,color:"white",padding:"5px 14px",borderRadius:6,fontSize:15,fontWeight:700,whiteSpace:"nowrap",flexShrink:0}}>
                 Launch →
               </div>
             </div>
@@ -887,9 +890,9 @@ export default function QuoteApp(){
         {/* SUMMARY PANEL */}
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
           <div style={{background:N,borderRadius:9,padding:16,color:"white",position:"sticky",top:14}}>
-            <div style={{fontSize:9,fontWeight:800,letterSpacing:"0.12em",color:"#475569",textTransform:"uppercase",marginBottom:12}}>Quote Summary</div>
-            <div style={{fontSize:10,color:"#94A3B8",marginBottom:3}}>{cust||"—"} · {reg.name} · {ct}</div>
-            {dr&&isNA&&<div style={{fontSize:9,background:"#1C3A1C",color:"#6EE7B7",padding:"2px 7px",borderRadius:3,display:"inline-block",marginBottom:6}}>✓ Deal Registration Active</div>}
+            <div style={{fontSize:15,fontWeight:800,letterSpacing:"0.12em",color:"#475569",textTransform:"uppercase",marginBottom:12}}>Quote Summary</div>
+            <div style={{fontSize:14,color:"#94A3B8",marginBottom:3}}>{cust||"—"} · {reg.name} · {ct}</div>
+            {dr&&isNA&&<div style={{fontSize:15,background:"#1C3A1C",color:"#6EE7B7",padding:"2px 7px",borderRadius:3,display:"inline-block",marginBottom:6}}>✓ Deal Registration Active</div>}
             <div style={{borderTop:"1px solid #1E3A5F",paddingTop:8,marginTop:6}}>
               <SRM l="Line items" v={lines.length} plain/>
               <SRM l="List total" v={$M(lstT)} muted/>
@@ -900,16 +903,16 @@ export default function QuoteApp(){
               {aTax&&isNA&&<SRM l={`Tax (${tax}%)`} v={$M(txA)} muted/>}
             </div>
             <div style={{borderTop:"1px solid #1E3A5F",marginTop:8,paddingTop:8,display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
-              <span style={{fontSize:11,color:"#94A3B8",fontWeight:600}}>Grand Total</span>
-              <span style={{fontSize:20,fontWeight:800,color:A}}>{$M(grand)}</span>
+              <span style={{fontSize:15,color:"#94A3B8",fontWeight:600}}>Grand Total</span>
+              <span style={{fontSize:22,fontWeight:800,color:A}}>{$M(grand)}</span>
             </div>
             {lines.length>0&&(
               <div style={{marginTop:12}}>
-                <div style={{fontSize:8,fontWeight:800,color:"#475569",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:5}}>By Category</div>
+                <div style={{fontSize:15,fontWeight:800,color:"#475569",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:5}}>By Category</div>
                 {Object.entries(cg).map(([c,ls])=>{
                   const s=ls.reduce((x,l)=>x+l.listPrice*l.qty*(1-l.discount),0),p=grand>0?s/grand:0;
                   return<div key={c} style={{marginBottom:4}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:2}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:14,marginBottom:2}}>
                       <span style={{color:"#94A3B8"}}>Type {c}</span>
                       <span style={{color:"white",fontWeight:600}}>{$M(s)}</span>
                     </div>
@@ -921,12 +924,12 @@ export default function QuoteApp(){
               </div>
             )}
             <div style={{marginTop:14,display:"flex",flexDirection:"column",gap:6}}>
-              <button onClick={exportPdf} disabled={exporting} style={{width:"100%",padding:8,background:A,color:"white",border:"none",borderRadius:5,fontSize:11,fontWeight:700,cursor:exporting?"wait":"pointer",opacity:exporting?0.7:1}}>{exporting?"⏳ Generating...":"⬇ Export PDF"}</button>
-              <button style={{width:"100%",padding:8,background:"transparent",color:"#94A3B8",border:"1px solid #1E3A5F",borderRadius:5,fontSize:11,fontWeight:600,cursor:"pointer"}}>⬇ Export Excel</button>
+              <button onClick={exportPdf} disabled={exporting} style={{width:"100%",padding:8,background:A,color:"white",border:"none",borderRadius:5,fontSize:15,fontWeight:700,cursor:exporting?"wait":"pointer",opacity:exporting?0.7:1}}>{exporting?"⏳ Generating...":"⬇ Export PDF"}</button>
+              <button style={{width:"100%",padding:8,background:"transparent",color:"#94A3B8",border:"1px solid #1E3A5F",borderRadius:5,fontSize:15,fontWeight:600,cursor:"pointer"}}>⬇ Export Excel</button>
             </div>
           </div>
           <div style={{background:"white",borderRadius:7,padding:12,border:`1px solid ${B}`,fontSize:10}}>
-            <div style={{fontWeight:700,color:T,marginBottom:7,fontSize:11}}>Quote Info</div>
+            <div style={{fontWeight:700,color:T,marginBottom:7,fontSize:13}}>Quote Info</div>
             {[["Date",dt],["Expires",exp],["Payment",pay],["Shipping",ship]].map(([k,v])=>(
               <div key={k} style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
                 <span style={{color:"#94A3B8"}}>{k}</span>
@@ -945,7 +948,7 @@ function Panel({title,icon,children,actions}){
   return(
     <div style={{background:"white",borderRadius:8,border:"1px solid #E2E8F0",overflow:"hidden"}}>
       <div style={{padding:"9px 12px",borderBottom:"1px solid #F1F5F9",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{display:"flex",alignItems:"center",gap:6}}><span>{icon}</span><span style={{fontWeight:700,fontSize:12,color:"#1A2035"}}>{title}</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}><span>{icon}</span><span style={{fontWeight:700,fontSize:14,color:"#1A2035"}}>{title}</span></div>
         {actions}
       </div>
       <div style={{padding:12}}>{children}</div>
@@ -961,15 +964,15 @@ function FlgM({label,sub,v,set,amt}){
   return<div style={{display:"flex",alignItems:"center",gap:7,padding:"8px 10px",background:v?"#F0FDF4":"#F8FAFC",borderRadius:6,border:`1px solid ${v?"#86EFAC":"#E2E8F0"}`}}>
     <TogM v={v} set={set}/>
     <div style={{flex:1}}>
-      <div style={{fontSize:11,fontWeight:v?600:400,color:v?"#166534":"#374151"}}>{label}</div>
-      <div style={{fontSize:9,color:"#94A3B8"}}>{sub}</div>
+      <div style={{fontSize:15,fontWeight:v?600:400,color:v?"#166534":"#374151"}}>{label}</div>
+      <div style={{fontSize:15,color:"#94A3B8"}}>{sub}</div>
     </div>
-    {amt&&<span style={{fontSize:11,fontWeight:700,color:"#059669"}}>{amt}</span>}
+    {amt&&<span style={{fontSize:15,fontWeight:700,color:"#059669"}}>{amt}</span>}
   </div>;
 }
 function SRM({l,v,muted,green,plain}){
   return<div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-    <span style={{fontSize:10,color:muted?"#475569":"#94A3B8"}}>{l}</span>
-    <span style={{fontSize:11,fontWeight:plain?400:600,color:green?"#10B981":muted?"#64748B":"white"}}>{v}</span>
+    <span style={{fontSize:14,color:muted?"#475569":"#94A3B8"}}>{l}</span>
+    <span style={{fontSize:15,fontWeight:plain?400:600,color:green?"#10B981":muted?"#64748B":"white"}}>{v}</span>
   </div>;
 }
