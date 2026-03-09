@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React from "react";
 import { exportQuotePDF } from "./pdfExport.js";
 import AdminUpload from "./AdminUpload.jsx";
 
@@ -1403,6 +1404,290 @@ const TDM=()=>new Date().toISOString().split("T")[0];
 const ADM=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().split("T")[0];};
 let _quid=1000;
 
+// ─── IMPORT PDF MODAL ────────────────────────────────────────────────────────
+function ImportPdfModal({ priceList, discounts, onImport, onClose }) {
+  const [status, setStatus] = useState("idle"); // idle | parsing | done | error
+  const [msg,    setMsg]    = useState("");
+  const [preview, setPreview] = useState(null);
+  const fileRef = useRef();
+
+  const parseDateStr = s => {
+    if (!s) return "";
+    // Try M/D/YYYY → YYYY-MM-DD
+    const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+    return s;
+  };
+
+  const handleFile = async (file) => {
+    if (!file || !file.name.endsWith(".pdf")) { setMsg("Please select a PDF file."); return; }
+    setStatus("parsing"); setMsg("Reading PDF…");
+    try {
+      // Load pdf.js from CDN
+      if (!window.pdfjsLib) {
+        await new Promise((res, rej) => {
+          const s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js";
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+      }
+      const ab  = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument({ data: ab }).promise;
+      let fullText = "";
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page  = await pdf.getPage(p);
+        const tc    = await page.getTextContent();
+        fullText   += tc.items.map(i => i.str).join(" ") + "\n";
+      }
+
+      // ── Extract header fields ──────────────────────────────────────────
+      const grab = (pattern) => { const m = fullText.match(pattern); return m ? m[1].trim() : ""; };
+
+      const qn   = grab(/Quotation\s*#[:\s]+([^\s]+(?:\s+[^\s]+)?)/i);
+      const cust = grab(/Customer\s*Name[:\s]+(.+?)(?=Customer\s*Contact|Address:|Phone|Date:|$)/si)
+                     .replace(/\s+/g," ").substring(0,60);
+      const cont = grab(/Customer\s*Contact[:\s]+(.+?)(?=Address:|Phone|Email:|$)/si)
+                     .replace(/\s+/g," ").substring(0,60);
+      const addr = grab(/Address[:\s]+(.+?)(?=Phone\/Fax|Phone:|Email:|Date:|$)/si)
+                     .replace(/\s+/g," ").substring(0,80);
+      const phone= grab(/Phone(?:\/Fax)?[:\s]+(.+?)(?=Email:|Date:|$)/si)
+                     .replace(/\s+/g," ").substring(0,40);
+      const email= grab(/Email[:\s]+(.+?)(?=Date:|Quote Valid|$)/si)
+                     .replace(/\s+/g," ").substring(0,60);
+      const qby  = grab(/Quoted\s*By[:\s]+(.+?)(?=Site|Part\s*Number|$)/si)
+                     .replace(/\s+/g," ").substring(0,40);
+      const dtRaw = grab(/Date[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i);
+      const expRaw= grab(/Quote\s*Valid\s*Until[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i);
+      const pay  = grab(/Payment\s*Terms[:\s]+(.+?)(?=Shipping|$)/si)
+                     .replace(/\s+/g," ").substring(0,40) || "Net 30 days";
+      const ship = grab(/Shipping\s*Terms[:\s]+(.+?)(?=Quoted|Part\s*Number|$)/si)
+                     .replace(/\s+/g," ").substring(0,40) || "FOB";
+
+      // ── Extract line items — find rows like "501RG0106 ... $1,170.00  26  $30,420.00" ──
+      const linePattern = /([A-Z0-9]{6,20})\s+(.+?)\s+\$([0-9,]+\.?\d*)\s+(\d+)\s+\$([0-9,]+\.?\d*)/g;
+      const parsedLines = [];
+      let m;
+      while ((m = linePattern.exec(fullText)) !== null) {
+        const pn      = m[1];
+        const descRaw = m[2].trim();
+        const unitP   = parseFloat(m[3].replace(/,/g,""));
+        const qty     = parseInt(m[4]);
+        // Skip known total rows
+        if (pn.match(/^(SVC|Total|Grand)/i)) continue;
+        if (descRaw.toLowerCase().startsWith("total")) continue;
+
+        // Find catalog match for list price & discount
+        const cat    = priceList.find(p => p.pn === pn);
+        const lp     = cat?.price || unitP;
+        const disc   = lp > 0 ? Math.round((1 - unitP/lp)*1000)/1000 : 0;
+        const safeDisc = disc >= 0 && disc < 1 ? disc : 0;
+
+        // Extract desc without trailing numbers and dollar signs
+        const desc = descRaw.replace(/\$[\d,]+\.?\d*/g,"").replace(/\s+/g," ").trim().substring(0,120)
+                    || cat?.desc || descRaw.substring(0,80);
+
+        parsedLines.push({
+          pn, desc, cat: cat?.cat || "A. Custom",
+          qty, listPrice: lp, discount: safeDisc, site: "",
+        });
+      }
+
+      if (parsedLines.length === 0) {
+        setStatus("error");
+        setMsg("Could not extract line items. Make sure this is an Actelis quote PDF.");
+        return;
+      }
+
+      const result = {
+        qn, cust, cont, addr, phone, email, qby,
+        dt: parseDateStr(dtRaw), exp: parseDateStr(expRaw),
+        pay, ship, lines: parsedLines,
+      };
+      setPreview(result);
+      setStatus("done");
+      setMsg(`Found ${parsedLines.length} line item(s).`);
+    } catch(e) {
+      setStatus("error");
+      setMsg("Parse error: " + e.message);
+    }
+  };
+
+  const OV = { position:"fixed",inset:0,zIndex:1000,background:"rgba(11,29,58,0.7)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(3px)" };
+  const BOX = { background:"white",borderRadius:12,width:"min(640px,94vw)",maxHeight:"85vh",overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.3)" };
+
+  return (
+    <div style={OV} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div style={BOX}>
+        <div style={{background:"#0B1D3A",padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+          <div style={{color:"#D97706",fontWeight:800,fontSize:14,letterSpacing:"0.06em"}}>📥 IMPORT ACTELIS QUOTE PDF</div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#64748B",fontSize:22,cursor:"pointer"}}>×</button>
+        </div>
+        <div style={{padding:20,overflowY:"auto",flex:1}}>
+          {status !== "done" && (
+            <>
+              <p style={{fontSize:13,color:"#475569",marginBottom:14}}>
+                Drop in an existing Actelis quote PDF. The tool will extract customer details, dates, and line items automatically.
+              </p>
+              <div
+                onClick={()=>fileRef.current.click()}
+                onDrop={e=>{e.preventDefault();handleFile(e.dataTransfer.files[0]);}}
+                onDragOver={e=>e.preventDefault()}
+                style={{border:"2px dashed #CBD5E1",borderRadius:10,padding:"30px 20px",textAlign:"center",cursor:"pointer",background:"#F8FAFC"}}>
+                <div style={{fontSize:32,marginBottom:8}}>📄</div>
+                <div style={{fontWeight:700,color:"#1A2035",fontSize:14}}>Click to browse or drag & drop PDF here</div>
+                <div style={{fontSize:12,color:"#94A3B8",marginTop:4}}>Actelis quote PDFs (V3.x format)</div>
+                <input ref={fileRef} type="file" accept=".pdf" style={{display:"none"}}
+                  onChange={e=>handleFile(e.target.files[0])} />
+              </div>
+              {msg && (
+                <div style={{marginTop:12,padding:"10px 14px",borderRadius:8,background:status==="error"?"#FEF2F2":"#EFF6FF",color:status==="error"?"#B91C1C":"#1D4ED8",fontSize:13,fontWeight:500}}>
+                  {status==="parsing"?"⏳ ":status==="error"?"❌ ":""}{msg}
+                </div>
+              )}
+            </>
+          )}
+
+          {status === "done" && preview && (
+            <>
+              <div style={{marginBottom:12,padding:"10px 14px",borderRadius:8,background:"#F0FDF4",color:"#166534",fontSize:13,fontWeight:600}}>
+                ✅ {msg} Review below and click Import to load into the tool.
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 16px",marginBottom:14,fontSize:12}}>
+                {[
+                  ["Quotation #", preview.qn],
+                  ["Customer",    preview.cust],
+                  ["Contact",     preview.cont],
+                  ["Date",        preview.dt],
+                  ["Expiry",      preview.exp],
+                  ["Quoted By",   preview.qby],
+                  ["Payment",     preview.pay],
+                  ["Shipping",    preview.ship],
+                ].map(([k,v])=>v?(
+                  <div key={k} style={{display:"flex",gap:6,padding:"3px 0",borderBottom:"1px solid #F1F5F9"}}>
+                    <span style={{color:"#94A3B8",minWidth:72,fontWeight:600}}>{k}</span>
+                    <span style={{color:"#1A2035"}}>{v}</span>
+                  </div>
+                ):null)}
+              </div>
+              <div style={{fontWeight:700,fontSize:12,color:"#475569",marginBottom:6,textTransform:"uppercase"}}>Line Items ({preview.lines.length})</div>
+              <div style={{border:"1px solid #E2E8F0",borderRadius:7,overflow:"hidden",marginBottom:14}}>
+                {preview.lines.map((l,i)=>(
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"90px 1fr 40px 70px",padding:"6px 10px",borderBottom:"1px solid #F8FAFC",fontSize:11,alignItems:"center",background:i%2?"white":"#FAFBFF"}}>
+                    <code style={{color:"#0B1D3A",fontWeight:700}}>{l.pn}</code>
+                    <span style={{color:"#1A2035"}}>{l.desc.substring(0,60)}</span>
+                    <span style={{textAlign:"center",color:"#475569"}}>{l.qty}</span>
+                    <span style={{textAlign:"right",fontWeight:700,color:"#0B1D3A"}}>${(l.listPrice*(1-l.discount)*l.qty).toLocaleString("en-US",{minimumFractionDigits:2})}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>{setStatus("idle");setMsg("");setPreview(null);}}
+                  style={{flex:1,padding:"9px",border:"1px solid #E2E8F0",borderRadius:7,background:"white",fontSize:13,fontWeight:600,cursor:"pointer",color:"#475569"}}>
+                  ← Try Another
+                </button>
+                <button onClick={()=>onImport(preview)}
+                  style={{flex:2,padding:"9px",background:"#0B1D3A",border:"none",borderRadius:7,color:"white",fontSize:14,fontWeight:700,cursor:"pointer"}}>
+                  ✅ Import into Quote
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── CUSTOM LINE ITEM MODAL ───────────────────────────────────────────────────
+function CustomLineModal({ onAdd, onClose }) {
+  const CATS = ["A1. GL Solutions","A2. ML600 Family","A2.1 ML600D Family","A3. Accessories","A4. ML230/ML2300","A5. Fiber Switches","A. Custom Item","B. Software","C. SFP / Cables","D. Services"];
+  const [pn,   setPn]   = useState("");
+  const [desc, setDesc] = useState("");
+  const [cat,  setCat]  = useState("A. Custom Item");
+  const [lp,   setLp]   = useState("");
+  const [disc, setDisc] = useState("0");
+  const [qty,  setQty]  = useState(1);
+  const [site, setSite] = useState("");
+
+  const listP  = parseFloat(lp)  || 0;
+  const discP  = parseFloat(disc)/100 || 0;
+  const unitP  = listP * (1 - discP);
+  const totalP = unitP * qty;
+  const inp    = {width:"100%",padding:"7px 9px",border:"1px solid #E2E8F0",borderRadius:6,fontSize:13,outline:"none",boxSizing:"border-box"};
+
+  const canAdd = pn.trim() && desc.trim() && listP > 0;
+
+  const OV  = { position:"fixed",inset:0,zIndex:1001,background:"rgba(11,29,58,0.7)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(3px)" };
+  const BOX = { background:"white",borderRadius:12,width:"min(520px,94vw)",boxShadow:"0 20px 60px rgba(0,0,0,0.3)" };
+
+  return (
+    <div style={OV} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div style={BOX}>
+        <div style={{background:"#0B1D3A",padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",borderRadius:"12px 12px 0 0"}}>
+          <div style={{color:"#D97706",fontWeight:800,fontSize:14,letterSpacing:"0.06em"}}>✏️ CUSTOM / NON-CATALOG LINE ITEM</div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#64748B",fontSize:22,cursor:"pointer"}}>×</button>
+        </div>
+        <div style={{padding:20}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase"}}>Part Number *</div>
+              <input style={inp} value={pn} onChange={e=>setPn(e.target.value)} placeholder="e.g. CUST-001 or NPI-2024" />
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase"}}>Category</div>
+              <select style={inp} value={cat} onChange={e=>setCat(e.target.value)}>
+                {CATS.map(c=><option key={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase"}}>Description *</div>
+            <input style={inp} value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Full product description" />
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase"}}>List Price *</div>
+              <input style={inp} type="number" min="0" step="0.01" value={lp} onChange={e=>setLp(e.target.value)} placeholder="0.00" />
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase"}}>Discount %</div>
+              <input style={inp} type="number" min="0" max="100" step="0.5" value={disc} onChange={e=>setDisc(e.target.value)} placeholder="0" />
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase"}}>Qty</div>
+              <input style={inp} type="number" min="1" value={qty} onChange={e=>setQty(Math.max(1,parseInt(e.target.value)||1))} />
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase"}}>Site Label</div>
+              <input style={inp} value={site} onChange={e=>setSite(e.target.value)} placeholder="Optional" />
+            </div>
+          </div>
+
+          {listP > 0 && (
+            <div style={{padding:"10px 14px",background:"#F8FAFC",borderRadius:8,border:"1px solid #E2E8F0",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontSize:12,color:"#64748B"}}>Unit: <b>${unitP.toLocaleString("en-US",{minimumFractionDigits:2})}</b>  × {qty}</span>
+              <span style={{fontWeight:800,fontSize:15,color:"#0B1D3A"}}>Total: ${totalP.toLocaleString("en-US",{minimumFractionDigits:2})}</span>
+            </div>
+          )}
+
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={onClose} style={{flex:1,padding:"9px",border:"1px solid #E2E8F0",borderRadius:7,background:"white",fontSize:13,fontWeight:600,cursor:"pointer",color:"#475569"}}>
+              Cancel
+            </button>
+            <button disabled={!canAdd} onClick={()=>onAdd({pn:pn.trim(),desc:desc.trim(),cat,listPrice:listP,discount:discP,qty,site})}
+              style={{flex:2,padding:"9px",background:canAdd?"#0B1D3A":"#CBD5E1",border:"none",borderRadius:7,color:"white",fontSize:14,fontWeight:700,cursor:canAdd?"pointer":"not-allowed"}}>
+              ✅ Add to Quote
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function QuoteApp(){
   const[qn,setQn]=useState("");const[cust,setCust]=useState("");const[cont,setCont]=useState("");
   const[addr,setAddr]=useState("");const[phone,setPhone]=useState("");const[email,setEmail]=useState("");
@@ -1415,6 +1700,8 @@ export default function QuoteApp(){
   const[aTax,setATax]=useState(false);const[tax,setTax]=useState(6);
   const[showWizard,setShowWizard]=useState(false);
   const[showAdmin,setShowAdmin]=useState(false);
+  const[showImport,setShowImport]=useState(false);
+  const[showCustom,setShowCustom]=useState(false);
 
   // Dynamic price data — loads from public/prices.json, falls back to embedded
   const[priceList,setPriceList]=useState(PRICE_LIST_FALLBACK);
@@ -1440,35 +1727,132 @@ export default function QuoteApp(){
 
   const exportPdf = useCallback(() => {
     setExporting(true);
+    // Use setTimeout so React can re-render the "Generating…" state before jsPDF blocks
+    setTimeout(() => {
+      try {
+        const hwLns  = lines.filter(l => !l.cat?.startsWith("D"));
+        const svcLns = lines.filter(l =>  l.cat?.startsWith("D"));
+        const hwBase = hwLns.reduce((s,l)=>s+l.listPrice*l.qty*(1-l.discount),0);
+        exportQuotePDF({
+          quote_num: qn || "DRAFT", status: stat, quoted_by: qby,
+          date: dt, expiry: exp,
+          customer: cust, contact: cont, address: addr, phone, email,
+          customer_type: ct, region: reg.name, payment: pay,
+          shipping: ship, deal_reg: dr, comments: cmts,
+          lines: hwLns.map(l => ({
+            pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
+            list_price: l.listPrice, discount: l.discount, site: l.site || "",
+          })),
+          svc_lines: svcLns.map(l => ({
+            pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
+            list_price: l.listPrice,
+            pct: l.listPrice < 1 && l.listPrice > 0 ? l.listPrice : 0,
+            hw_base: hwBase,
+          })),
+          add_ship: aShip, add_cc: aCC, add_tax: aTax, tax_rate: tax,
+        });
+      } catch(err) {
+        alert("PDF export failed: " + err.message);
+      } finally {
+        setExporting(false);
+      }
+    }, 80);
+  }, [qn, stat, qby, dt, exp, cust, cont, addr, phone, email, ct, reg, pay, ship, dr, cmts, lines, aShip, aCC, aTax, tax]);
+
+  // ── Excel export ──────────────────────────────────────────────────────────
+  const exportExcel = useCallback(async () => {
     try {
+      // Lazy-load SheetJS from CDN
+      if (!window.XLSX) {
+        await new Promise((res, rej) => {
+          const s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const XL = window.XLSX;
+      const wb = XL.utils.book_new();
+
+      // ── Sheet 1: Quote Header ───────────────────────────────────────────
+      const headerRows = [
+        ["Actelis Networks, Inc.", "", "", ""],
+        ["710 Lakeway Drive, Ste 200, Sunnyvale, CA 94085"],
+        [],
+        ["Quotation #:",      qn || "DRAFT",  "Date:",           dt],
+        ["Customer Name:",    cust,            "Quote Valid Until:", exp],
+        ["Customer Contact:", cont,            "Payment Terms:",  pay],
+        ["Address:",          addr,            "Shipping Terms:", ship],
+        ["Phone/Fax:",        phone,           "Quoted By:",      qby],
+        ["Email:",            email],
+        [],
+      ];
+      const wsHeader = XL.utils.aoa_to_sheet(headerRows);
+      XL.utils.book_append_sheet(wb, wsHeader, "Quote Info");
+
+      // ── Sheet 2: Line Items ─────────────────────────────────────────────
       const hwLns  = lines.filter(l => !l.cat?.startsWith("D"));
       const svcLns = lines.filter(l =>  l.cat?.startsWith("D"));
       const hwBase = hwLns.reduce((s,l)=>s+l.listPrice*l.qty*(1-l.discount),0);
-      exportQuotePDF({
-        quote_num: qn || "DRAFT", status: stat, quoted_by: qby,
-        date: dt, expiry: exp,
-        customer: cust, contact: cont, address: addr, phone, email,
-        customer_type: ct, region: reg.name, payment: pay,
-        shipping: ship, deal_reg: dr, comments: cmts,
-        lines: hwLns.map(l => ({
-          pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
-          list_price: l.listPrice, discount: l.discount, site: l.site || "",
-        })),
-        svc_lines: svcLns.map(l => ({
-          pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
-          list_price: l.listPrice,
-          // listPrice < 1 means it's a percentage of hw total
-          pct: l.listPrice < 1 && l.listPrice > 0 ? l.listPrice : 0,
-          hw_base: hwBase,
-        })),
-        add_ship: aShip, add_cc: aCC, add_tax: aTax, tax_rate: tax,
-      });
+
+      const lineRows = [
+        ["Part Number", "Description", "Category", "Site", "List Price", "Discount %", "Unit Price", "Qty", "Total Price"],
+      ];
+      let hwTotal = 0;
+      for (const l of hwLns) {
+        const unitP = l.listPrice * (1 - l.discount);
+        const totP  = unitP * l.qty;
+        hwTotal += totP;
+        lineRows.push([
+          l.pn, l.desc, l.cat, l.site || "",
+          l.listPrice,
+          +(l.discount * 100).toFixed(1),
+          +unitP.toFixed(2),
+          l.qty,
+          +totP.toFixed(2),
+        ]);
+      }
+      lineRows.push([]);
+      lineRows.push(["", "", "", "HARDWARE TOTAL", "", "", "", "", +hwTotal.toFixed(2)]);
+      lineRows.push([]);
+
+      if (svcLns.length > 0) {
+        lineRows.push(["Part Number", "Description", "% of LP", "Qty", "Unit Price", "Total Price"]);
+        let svcTotal = 0;
+        for (const sv of svcLns) {
+          const pct     = sv.listPrice < 1 && sv.listPrice > 0 ? sv.listPrice : 0;
+          const unitAmt = pct > 0 ? hwBase * pct : sv.listPrice;
+          const totAmt  = unitAmt * sv.qty;
+          svcTotal += totAmt;
+          lineRows.push([
+            sv.pn, sv.desc,
+            pct > 0 ? `${(pct*100).toFixed(1)}%` : "",
+            sv.qty,
+            +unitAmt.toFixed(2),
+            +totAmt.toFixed(2),
+          ]);
+        }
+        lineRows.push(["", "SERVICE TOTAL", "", "", "", +svcTotal.toFixed(2)]);
+        lineRows.push([]);
+        lineRows.push(["", "GRAND TOTAL (HW + Services)", "", "", "", +(hwTotal+svcTotal).toFixed(2)]);
+      }
+
+      if (cmts) lineRows.push([], ["Comments:", cmts]);
+
+      const wsLines = XL.utils.aoa_to_sheet(lineRows);
+      // Column widths
+      wsLines["!cols"] = [
+        {wch:18},{wch:55},{wch:30},{wch:16},
+        {wch:12},{wch:11},{wch:12},{wch:6},{wch:14},
+      ];
+      XL.utils.book_append_sheet(wb, wsLines, "Line Items");
+
+      const safe = (qn||"DRAFT").replace(/[/\\:*?"<>|]/g,"_").replace(/\s+/g,"_");
+      XL.writeFile(wb, `Actelis_Quote_${safe}.xlsx`);
     } catch(err) {
-      alert("PDF export failed: " + err.message);
-    } finally {
-      setExporting(false);
+      alert("Excel export failed: " + err.message);
     }
-  }, [qn, stat, qby, dt, exp, cust, cont, addr, phone, email, ct, reg, pay, ship, dr, cmts, lines, aShip, aCC, aTax, tax]);
+  }, [qn, dt, exp, cust, cont, addr, phone, email, pay, ship, qby, cmts, lines]);
 
 
 
@@ -1522,6 +1906,36 @@ export default function QuoteApp(){
         />
       )}
 
+      {/* ── IMPORT PDF MODAL ───────────────────────────────────────────── */}
+      {showImport && <ImportPdfModal
+        priceList={priceList} discounts={discounts}
+        onImport={(data) => {
+          if (data.qn)    setQn(data.qn);
+          if (data.cust)  setCust(data.cust);
+          if (data.cont)  setCont(data.cont);
+          if (data.addr)  setAddr(data.addr);
+          if (data.phone) setPhone(data.phone);
+          if (data.email) setEmail(data.email);
+          if (data.qby)   setQby(data.qby);
+          if (data.dt)    setDt(data.dt);
+          if (data.exp)   setExp(data.exp);
+          if (data.pay)   setPay(data.pay);
+          if (data.ship)  setShip(data.ship);
+          if (data.cmts)  setCmts(data.cmts);
+          if (data.lines?.length) {
+            setLines(data.lines.map(l => ({...l, id:_quid++})));
+          }
+          setShowImport(false);
+        }}
+        onClose={()=>setShowImport(false)}
+      />}
+
+      {/* ── CUSTOM LINE ITEM MODAL ─────────────────────────────────────── */}
+      {showCustom && <CustomLineModal
+        onAdd={(line) => { setLines(prev=>[...prev,{...line,id:_quid++}]); setShowCustom(false); }}
+        onClose={()=>setShowCustom(false)}
+      />}
+
       {/* NAV */}
       <div style={{background:N,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}>
         <div style={{display:"flex",alignItems:"center",gap:16}}>
@@ -1534,9 +1948,17 @@ export default function QuoteApp(){
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
-          {[["📥 Import PDF",false],["⬇ Excel",false],["🔗 HubSpot",false]].map(([l,p])=>(
+          {[["🔗 HubSpot",false]].map(([l,p])=>(
             <button key={l} style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:p?A:"#1E3A5F",color:p?"white":"#94A3B8",border:"none"}}>{l}</button>
           ))}
+          <button onClick={()=>setShowImport(true)}
+            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
+            📥 Import PDF
+          </button>
+          <button onClick={exportExcel}
+            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
+            ⬇ Excel
+          </button>
           <button onClick={()=>setShowAdmin(true)}
             style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",
               background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
@@ -1697,6 +2119,17 @@ export default function QuoteApp(){
                 Launch →
               </div>
             </div>
+
+            {/* CUSTOM LINE ITEM */}
+            <div onClick={()=>setShowCustom(true)} style={{marginTop:8,padding:"10px 16px",background:"#F8FAFC",border:"1.5px dashed #CBD5E1",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="#F1F5F9";e.currentTarget.style.borderColor="#94A3B8";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="#F8FAFC";e.currentTarget.style.borderColor="#CBD5E1";}}>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:"#475569"}}>✏️ Add Custom / Non-Catalog Item</div>
+                <div style={{fontSize:12,color:"#94A3B8",marginTop:1}}>Quote a product not in the catalog — enter part #, description and price manually</div>
+              </div>
+              <div style={{color:"#64748B",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,marginLeft:12}}>+ Add</div>
+            </div>
           </Panel>
 
           {/* FINANCIAL OPTIONS */}
@@ -1753,7 +2186,7 @@ export default function QuoteApp(){
             )}
             <div style={{marginTop:14,display:"flex",flexDirection:"column",gap:6}}>
               <button onClick={exportPdf} disabled={exporting} style={{width:"100%",padding:8,background:A,color:"white",border:"none",borderRadius:5,fontSize:15,fontWeight:700,cursor:exporting?"wait":"pointer",opacity:exporting?0.7:1}}>{exporting?"⏳ Generating...":"⬇ Export PDF"}</button>
-              <button style={{width:"100%",padding:8,background:"transparent",color:"#94A3B8",border:"1px solid #1E3A5F",borderRadius:5,fontSize:15,fontWeight:600,cursor:"pointer"}}>⬇ Export Excel</button>
+              <button onClick={exportExcel} style={{width:"100%",padding:8,background:"transparent",color:"#94A3B8",border:"1px solid #1E3A5F",borderRadius:5,fontSize:15,fontWeight:600,cursor:"pointer"}}>⬇ Export Excel</button>
             </div>
           </div>
           <div style={{background:"white",borderRadius:7,padding:12,border:`1px solid ${B}`,fontSize:10}}>
