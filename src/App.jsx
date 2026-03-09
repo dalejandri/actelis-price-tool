@@ -384,6 +384,8 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
 
     return items;
   }, [sel, type, isNA]);
+
+  const bomLines  = useMemo(() => makeLines(bom, rid, custType, dealReg), [bom, rid, custType, dealReg]);
   const bomTotal  = bomLines.reduce((s, l) => s + l.price * l.qty * (1 - l.discount), 0);
   const bomList   = bomLines.reduce((s, l) => s + l.price * l.qty, 0);
 
