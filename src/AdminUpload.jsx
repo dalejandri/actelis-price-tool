@@ -2,6 +2,39 @@ import { useState, useCallback, useRef } from "react";
 
 const N = "#0B1D3A", A = "#D97706", B = "#E2E8F0", T = "#1A2035", M = "#64748B";
 
+
+// ── XLSX parser — handles the Actelis Price_List_Letter.xlsx format ───────────
+function processXLSX(rows, type) {
+  if (type !== "pricelist") throw new Error("XLSX import is supported for Price List only. Use CSV for discounts.");
+
+  const items = [];
+  let currentCat = "";
+
+  for (const row of rows) {
+    const catCol   = String(row[2] || "").trim();
+    const pnCol    = String(row[3] || "").trim();
+    const descCol  = String(row[4] || "").trim();
+    const priceCol = row[6];
+
+    // Category header row (has category but no part number)
+    if (catCol && catCol !== "Category" && !pnCol) {
+      currentCat = catCol;
+      continue;
+    }
+
+    // Product row
+    if (pnCol && descCol && priceCol !== "" && priceCol !== null) {
+      const price = parsePrice(String(priceCol));
+      if (price > 0) {
+        items.push({ pn: pnCol, desc: descCol, price, cat: currentCat });
+      }
+    }
+  }
+
+  if (items.length === 0) throw new Error("No products found — check the file format. Expected: Category in col C, Part# in col D, Description in col E, Price in col G.");
+  return items;
+}
+
 // ── CSV column mappings (matches Actelis TablesPrice_List.csv format) ─────────
 const COL = {
   pn:          ["Part Number", "PN", "Part#", "PartNumber"],
@@ -128,6 +161,17 @@ function diffPriceLists(oldList, newList) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function AdminUpload({ onClose, currentPrices, currentDiscounts, currentServices }) {
+
+  // Load SheetJS for xlsx parsing
+  useEffect(() => {
+    if (!window._XLSX) {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+      s.onload = () => { window._XLSX = window.XLSX; };
+      document.head.appendChild(s);
+    }
+  }, []);
+
   const [tab, setTab]         = useState("pricelist");
   const [drag, setDrag]       = useState(false);
   const [parsed, setParsed]   = useState(null);
@@ -144,19 +188,35 @@ export default function AdminUpload({ onClose, currentPrices, currentDiscounts, 
     if (!file) return;
     setError(null); setParsed(null); setPreview(null);
     setFilename(file.name);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const result = processCSV(e.target.result, tab);
-        setParsed(result);
-        if (tab === "pricelist") {
-          setPreview(diffPriceLists(currentPrices, result));
-        }
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    reader.readAsText(file);
+    const isXlsx = file.name.match(/\.xlsx?$/i);
+
+    if (isXlsx) {
+      // Use SheetJS to parse xlsx
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const XLSX = window._XLSX;
+          if (!XLSX) throw new Error("XLSX library not loaded yet — try again in a moment");
+          const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+          const result = processXLSX(rows, tab);
+          setParsed(result);
+          if (tab === "pricelist") setPreview(diffPriceLists(currentPrices, result));
+        } catch (err) { setError(err.message); }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const result = processCSV(e.target.result, tab);
+          setParsed(result);
+          if (tab === "pricelist") setPreview(diffPriceLists(currentPrices, result));
+        } catch (err) { setError(err.message); }
+      };
+      reader.readAsText(file);
+    }
   }, [tab, currentPrices]);
 
   const handleDrop = useCallback((e) => {
@@ -233,8 +293,7 @@ export default function AdminUpload({ onClose, currentPrices, currentDiscounts, 
           {/* Help text */}
           <div style={{ background:"#EFF6FF", border:"1px solid #BFDBFE", borderRadius:7, padding:"10px 14px", marginBottom:16, fontSize:12, color:"#1E40AF" }}>
             {tab === "pricelist" ? (<>
-              <b>Expected columns:</b> Part Number, Description, List Price, Category, ShowPriceList (1/0), Legacy (1/0)
-              <br/>This is the raw export from <code>TablesPrice_List.csv</code> — the same format from Access.
+              <b>Recommended:</b> Upload <code>Price_List_Letter.xlsx</code> directly — it's auto-detected and parsed.<br/>Also accepts <code>TablesPrice_List.csv</code> from Access export.
             </>) : (<>
               <b>Expected columns:</b> Category, naReseller, naEndUser, regBonus, emeaReseller, emeaEndUser
               <br/>Values should be decimals (e.g. 0.33 = 33%). Export from <code>TablesDiscounts.csv</code>.
@@ -256,7 +315,7 @@ export default function AdminUpload({ onClose, currentPrices, currentDiscounts, 
             <div style={{ fontSize:14, fontWeight:600, color:T }}>
               {filename ? `✓ ${filename}` : "Drop CSV file here or click to browse"}
             </div>
-            <div style={{ fontSize:12, color:M, marginTop:4 }}>Accepts .csv files exported from Access or Excel</div>
+            <div style={{ fontSize:12, color:M, marginTop:4 }}>Accepts .xlsx (Price_List_Letter.xlsx) or .csv files</div>
           </div>
 
           {/* Error */}
