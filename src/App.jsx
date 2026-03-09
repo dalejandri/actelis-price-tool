@@ -6,7 +6,72 @@ import AdminUpload from "./AdminUpload.jsx";
 // ═══════════════ NODE CONFIGURATOR WIZARD ═══════════════
 
 // ─── WIZARD PRICE DATA (embedded, separate from main quote price list) ────────
-const PRICE_LIST = [{"pn":"501RG0016","desc":"ML622","price":1145.0,"cat":"A2. ML600 Family"},{"pn":"501RG0046","desc":"ML624","price":1720.0,"cat":"A2. ML600 Family"},{"pn":"501RG0067","desc":"ML638","price":2306.0,"cat":"A2. ML600 Family"},{"pn":"501RG0076","desc":"ML654S","price":3748.0,"cat":"A2. ML600 Family"},{"pn":"501RG0077","desc":"ML658S","price":4430.0,"cat":"A2. ML600 Family"},{"pn":"501RG0078","desc":"ML650SV","price":3308.0,"cat":"A2. ML600 Family"},{"pn":"501RG0106","desc":"ML684M","price":1950.0,"cat":"A2. ML600 Family"},{"pn":"501RG0111","desc":"ML6916EN","price":6554.0,"cat":"A2. ML600 Family"},{"pn":"501RG0115","desc":"ML6916EL","price":6665.0,"cat":"A2. ML600 Family"},{"pn":"501RG0116","desc":"ML644EL","price":3560.0,"cat":"A2. ML600 Family"},{"pn":"501RG0121","desc":"ML622i with 24/48Vdc","price":800.0,"cat":"A2. ML600 Family"},{"pn":"501RG0122","desc":"ML624i with 24/48Vdc","price":1260.0,"cat":"A2. ML600 Family"},{"pn":"501RG0217","desc":"ML648E","price":3031.0,"cat":"A2. ML600 Family"},{"pn":"501RG0218","desc":"ML6416E","price":4595.0,"cat":"A2. ML600 Family"},{"pn":"501RG0238","desc":"ML6916E (w/o SyncE)","price":6090.0,"cat":"A2. ML600 Family"},{"pn":"501RG0253","desc":"ML698ES","price":5055.0,"cat":"A2. ML600 Family"},{"pn":"501RG0254","desc":"ML6916ES","price":6550.0,"cat":"A2. ML600 Family"},{"pn":"501RG0259","desc":"ML698E","price":3679.0,"cat":"A2. ML600 Family"},{"pn":"501RG3230","desc":"ML684D (New)","price":1950.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3231","desc":"ML680DF (New)","price":953.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3240","desc":"ML622D (New)","price":1374.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG0232","desc":"ML684DTP","price":2295.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3255","desc":"ML684D-M (12/24V)","price":1995.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3256","desc":"ML684D-M (48/60V)","price":1995.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3355","desc":"ML684DL-M (12/24V)","price":2795.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3356","desc":"ML684DL-M (48/60V)","price":2795.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3358","desc":"ML684DLP-M","price":2989.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3376","desc":"ML680DL-M (48/60V)","price":2019.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3378","desc":"ML680DLP-M","price":1410.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG0134","desc":"GL850L-16O","price":4251.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0135","desc":"GL850L-16R","price":3917.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0139","desc":"GL830-16O","price":3748.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0140","desc":"GL830-8O","price":3148.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0143","desc":"GL830-16R","price":3330.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0144","desc":"GL830-8R","price":2921.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0167","desc":"GL904","price":1120.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0168","desc":"GL904-R","price":1410.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0302","desc":"GL916","price":1950.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0300","desc":"GL916-R","price":2230.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0303","desc":"GL908","price":1380.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0301","desc":"GL908-R","price":1680.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"506R61334","desc":"GL9110C","price":1800.0,"cat":"A1.2 GL9000 Headend Solutions"},{"pn":"506R61342","desc":"GL9104C","price":1550.0,"cat":"A1.2 GL9000 Headend Solutions"},{"pn":"506R61335","desc":"GL901CS","price":162.0,"cat":"A1.2 GL9000 Headend Solutions"},{"pn":"506R61337","desc":"GL93C","price":110.0,"cat":"A1.3 GL9000 CPEs"},{"pn":"506R61336","desc":"GL93C-W","price":257.0,"cat":"A1.3 GL9000 CPEs"},{"pn":"501S61245E","desc":"GL91 (EU/US)","price":150.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61245U","desc":"GL91 (UK)","price":150.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61246","desc":"GL91T","price":120.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61246E","desc":"GL91T (EU/US)","price":155.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61247","desc":"GL91T-RB","price":195.0,"cat":"A1.5 GL900 CPEs"},{"pn":"506R61245","desc":"GL91","price":110.0,"cat":"A1.5 GL900 CPEs"},{"pn":"502R20230","desc":"Chassis 200 Shelf (CHS-200)","price":1127.0,"cat":"A4.1 Shelves"},{"pn":"502R02110","desc":"Chassis 2000B Shelf, 19\" (CHS-2000B)","price":2985.0,"cat":"A4.1 Shelves"},{"pn":"503R60042","desc":"Service Dispatcher Unit (SDU-450)","price":10345.0,"cat":"A4.2 SDU (Service Dispatch Units)"},{"pn":"503R60043","desc":"Service Dispatcher Unit (SDU-450G)","price":11495.0,"cat":"A4.2 SDU (Service Dispatch Units)"},{"pn":"503R20132","desc":"MLU-32DF (32 pairs, front access)","price":6325.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"503R20164","desc":"MLU-64DF (64 pairs, front access)","price":9195.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"503R20232","desc":"MLU-32DR (32 pairs, rear access)","price":6325.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"503R20264","desc":"MLU-64DR (64 pairs, rear access)","price":9195.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"504R20110","desc":"DSL Quad Cable, 4xRJ-45, 10ft/3m","price":46.0,"cat":"C4.1 DSL Cables"},{"pn":"504R20120","desc":"DSL Octal Cable, 8xRJ-45, 10ft/3m","price":69.0,"cat":"C4.1 DSL Cables"},{"pn":"510K20230","desc":"Accessories Kit for CHS-200","price":115.0,"cat":"A4.4 CHS-200 Related Items"},{"pn":"506R30070","desc":"Fan Control Module for CHS-2000B","price":685.0,"cat":"A4.5 CHS-2000 Related Items"},{"pn":"550A00046","desc":"Flash Card for SDU-450/G","price":173.0,"cat":"A4.5 CHS-2000 Related Items"},{"pn":"506R00006","desc":"AC-DC PSU for ML600/ML740/ML530 (NA)","price":110.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00006E","desc":"AC-DC PSU for ML600/ML740/ML530 (EU)","price":110.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00008","desc":"AC-DC PSU for GL900 (NA)","price":58.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00008U","desc":"AC-DC PSU for GL900 (UK)","price":58.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00013","desc":"AC/DC PSU for GL800 (NA)","price":138.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00013E","desc":"AC/DC PSU for GL800 (EU)","price":138.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61181","desc":"DIN Rail PSU 24VDC for ML600Dx (no PoE)","price":156.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61184","desc":"DIN Rail PSU 24VDC + EU Cables","price":184.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61185","desc":"DIN Rail PSU 24VDC + US Cables","price":184.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61191","desc":"DIN Rail PSU 48VDC with PoE","price":225.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"510K00060","desc":"Accessories Kit for ML600/ML700/ML530","price":23.0,"cat":"A3.2 GL800/GL900ML500/ML600/ML700 Related Items"},{"pn":"510R21080","desc":"Wall Mount Kit for ML600/ML700/GL800/GL900","price":52.0,"cat":"A3.2 GL800/GL900ML500/ML600/ML700 Related Items"},{"pn":"510R21070","desc":"Rack Mount Sleeve Kit (2 ML600/700/530)","price":225.0,"cat":"A3.2 GL800/GL900ML500/ML600/ML700 Related Items"},{"pn":"506R00002","desc":"1000Base-LX SMF SFP (10km)","price":68.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00012","desc":"1000Base-SX MMF SFP (500m)","price":68.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00022","desc":"100Base-FX MMF SFP (2km)","price":115.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00032","desc":"100Base-FX SMF SFP (15km)","price":68.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00042","desc":"1000Base-T SFP","price":103.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61154","desc":"2500Base-FX SMF SFP (30km)","price":289.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61155","desc":"2500Base-FX MMF SFP (500m)","price":127.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61213","desc":"100/1000Base-T SFP","price":103.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61235","desc":"10G BASE-LR SFP+ (10km)","price":147.0,"cat":"C1. SFP Transceivers"}];
+const PRICE_LIST = [{"pn":"501RG0016","desc":"ML622","price":1145.0,"cat":"A2. ML600 Family"},{"pn":"501RG0046","desc":"ML624","price":1720.0,"cat":"A2. ML600 Family"},{"pn":"501RG0067","desc":"ML638","price":2306.0,"cat":"A2. ML600 Family"},{"pn":"501RG0076","desc":"ML654S","price":3748.0,"cat":"A2. ML600 Family"},{"pn":"501RG0077","desc":"ML658S","price":4430.0,"cat":"A2. ML600 Family"},{"pn":"501RG0078","desc":"ML650SV","price":3308.0,"cat":"A2. ML600 Family"},{"pn":"501RG0106","desc":"ML684M","price":1950.0,"cat":"A2. ML600 Family"},{"pn":"501RG0111","desc":"ML6916EN","price":6554.0,"cat":"A2. ML600 Family"},{"pn":"501RG0115","desc":"ML6916EL","price":6665.0,"cat":"A2. ML600 Family"},{"pn":"501RG0116","desc":"ML644EL","price":3560.0,"cat":"A2. ML600 Family"},{"pn":"501RG0121","desc":"ML622i with 24/48Vdc","price":800.0,"cat":"A2. ML600 Family"},{"pn":"501RG0122","desc":"ML624i with 24/48Vdc","price":1260.0,"cat":"A2. ML600 Family"},{"pn":"501RG0217","desc":"ML648E","price":3031.0,"cat":"A2. ML600 Family"},{"pn":"501RG0218","desc":"ML6416E","price":4595.0,"cat":"A2. ML600 Family"},{"pn":"501RG0238","desc":"ML6916E (w/o SyncE)","price":6090.0,"cat":"A2. ML600 Family"},{"pn":"501RG0253","desc":"ML698ES","price":5055.0,"cat":"A2. ML600 Family"},{"pn":"501RG0254","desc":"ML6916ES","price":6550.0,"cat":"A2. ML600 Family"},{"pn":"501RG0259","desc":"ML698E","price":3679.0,"cat":"A2. ML600 Family"},{"pn":"501RG3230","desc":"ML684D (New)","price":1950.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3231","desc":"ML680DF (New)","price":953.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3240","desc":"ML622D (New)","price":1374.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG0232","desc":"ML684DTP","price":2295.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3255","desc":"ML684D-M (12/24V)","price":1995.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3256","desc":"ML684D-M (48/60V)","price":1995.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3355","desc":"ML684DL-M (12/24V)","price":2795.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3356","desc":"ML684DL-M (48/60V)","price":2795.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3358","desc":"ML684DLP-M","price":2989.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3376","desc":"ML680DL-M (48/60V)","price":2019.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG3378","desc":"ML680DLP-M","price":1410.0,"cat":"A2.1 ML600D Family"},{"pn":"501RG0134","desc":"GL850L-16O","price":4251.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0135","desc":"GL850L-16R","price":3917.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0139","desc":"GL830-16O","price":3748.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0140","desc":"GL830-8O","price":3148.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0143","desc":"GL830-16R","price":3330.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0144","desc":"GL830-8R","price":2921.0,"cat":"A1.1 GL800 Solutions"},{"pn":"501RG0167","desc":"GL904","price":1120.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0168","desc":"GL904-R","price":1410.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0302","desc":"GL916","price":1950.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0300","desc":"GL916-R","price":2230.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0303","desc":"GL908","price":1380.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"501RG0301","desc":"GL908-R","price":1680.0,"cat":"A1.4 GL900 Headend Solutions"},{"pn":"506R61334","desc":"GL9110C","price":1800.0,"cat":"A1.2 GL9000 Headend Solutions"},{"pn":"506R61342","desc":"GL9104C","price":1550.0,"cat":"A1.2 GL9000 Headend Solutions"},{"pn":"506R61335","desc":"GL901CS","price":162.0,"cat":"A1.2 GL9000 Headend Solutions"},{"pn":"506R61337","desc":"GL93C","price":110.0,"cat":"A1.3 GL9000 CPEs"},{"pn":"506R61336","desc":"GL93C-W","price":257.0,"cat":"A1.3 GL9000 CPEs"},{"pn":"501S61245E","desc":"GL91 (EU/US)","price":150.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61245U","desc":"GL91 (UK)","price":150.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61246","desc":"GL91T","price":120.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61246E","desc":"GL91T (EU/US)","price":155.0,"cat":"A1.5 GL900 CPEs"},{"pn":"501S61247","desc":"GL91T-RB","price":195.0,"cat":"A1.5 GL900 CPEs"},{"pn":"506R61245","desc":"GL91","price":110.0,"cat":"A1.5 GL900 CPEs"},{"pn":"502R20230","desc":"Chassis 200 Shelf (CHS-200)","price":1127.0,"cat":"A4.1 Shelves"},{"pn":"502R02110","desc":"Chassis 2000B Shelf, 19\" (CHS-2000B)","price":2985.0,"cat":"A4.1 Shelves"},{"pn":"503R60042","desc":"Service Dispatcher Unit (SDU-450)","price":10345.0,"cat":"A4.2 SDU (Service Dispatch Units)"},{"pn":"503R60043","desc":"Service Dispatcher Unit (SDU-450G)","price":11495.0,"cat":"A4.2 SDU (Service Dispatch Units)"},{"pn":"503R20132","desc":"MLU-32DF (32 pairs, front access)","price":6325.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"503R20164","desc":"MLU-64DF (64 pairs, front access)","price":9195.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"503R20232","desc":"MLU-32DR (32 pairs, rear access)","price":6325.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"503R20264","desc":"MLU-64DR (64 pairs, rear access)","price":9195.0,"cat":"A4.3 MLU (Multiport Line Units)"},{"pn":"504R20110","desc":"DSL Quad Cable, 4xRJ-45, 10ft/3m","price":46.0,"cat":"C4.1 DSL Cables"},{"pn":"504R20120","desc":"DSL Octal Cable, 8xRJ-45, 10ft/3m","price":69.0,"cat":"C4.1 DSL Cables"},{"pn":"510K20230","desc":"Accessories Kit for CHS-200","price":115.0,"cat":"A4.4 CHS-200 Related Items"},{"pn":"506R30070","desc":"Fan Control Module for CHS-2000B","price":685.0,"cat":"A4.5 CHS-2000 Related Items"},{"pn":"550A00046","desc":"Flash Card for SDU-450/G","price":173.0,"cat":"A4.5 CHS-2000 Related Items"},{"pn":"506R00006","desc":"AC-DC PSU for ML600/ML740/ML530 (NA)","price":110.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00006E","desc":"AC-DC PSU for ML600/ML740/ML530 (EU)","price":110.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00008","desc":"AC-DC PSU for GL900 (NA)","price":58.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00008U","desc":"AC-DC PSU for GL900 (UK)","price":58.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00013","desc":"AC/DC PSU for GL800 (NA)","price":138.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R00013E","desc":"AC/DC PSU for GL800 (EU)","price":138.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61181","desc":"DIN Rail PSU 24VDC for ML600Dx (no PoE)","price":156.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61184","desc":"DIN Rail PSU 24VDC + EU Cables","price":184.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61185","desc":"DIN Rail PSU 24VDC + US Cables","price":184.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"506R61191","desc":"DIN Rail PSU 48VDC with PoE","price":225.0,"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700"},{"pn":"510K00060","desc":"Accessories Kit for ML600/ML700/ML530","price":23.0,"cat":"A3.2 GL800/GL900ML500/ML600/ML700 Related Items"},{"pn":"510R21080","desc":"Wall Mount Kit for ML600/ML700/GL800/GL900","price":52.0,"cat":"A3.2 GL800/GL900ML500/ML600/ML700 Related Items"},{"pn":"510R21070","desc":"Rack Mount Sleeve Kit (2 ML600/700/530)","price":225.0,"cat":"A3.2 GL800/GL900ML500/ML600/ML700 Related Items"},{"pn":"506R00002","desc":"1000Base-LX SMF SFP (10km)","price":68.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00012","desc":"1000Base-SX MMF SFP (500m)","price":68.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00022","desc":"100Base-FX MMF SFP (2km)","price":115.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00032","desc":"100Base-FX SMF SFP (15km)","price":68.0,"cat":"C1. SFP Transceivers"},{"pn":"506R00042","desc":"1000Base-T SFP","price":103.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61154","desc":"2500Base-FX SMF SFP (30km)","price":289.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61155","desc":"2500Base-FX MMF SFP (500m)","price":127.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61213","desc":"100/1000Base-T SFP","price":103.0,"cat":"C1. SFP Transceivers"},{"pn":"506R61235","desc":"10G BASE-LR SFP+ (10km)","price":147.0,"cat":"C1. SFP Transceivers"},
+{"pn":"503R60041","desc":"Service Dispatcher Unit (SDU-455G)","price":12645.0,"cat":"A4.2 SDU (Service Dispatch Units)"},
+{"pn":"504R60060","desc":"Copper Loop 64-pair DIN, US Color Code, 25ft","price":237.0,"cat":"C4.1 DSL Cables"},
+{"pn":"504R60062","desc":"Copper Loop 64-pair DIN, US Color Code, 100ft","price":657.0,"cat":"C4.1 DSL Cables"},
+{"pn":"504R60063","desc":"Copper Loop 64-pair DIN, US Color Code, 150ft","price":733.0,"cat":"C4.1 DSL Cables"},
+{"pn":"504R60088","desc":"Copper Loop 64-pair FCI, US Color Code, 100ft","price":449.0,"cat":"C4.1 DSL Cables"},
+{"pn":"504R20140","desc":"DSL Quad Cable, 4xRJ-45, 100ft/30m","price":173.0,"cat":"C4.1 DSL Cables"},
+{"pn":"504R20160","desc":"DSL Octal Cable, 8xRJ-45, 100ft/30m","price":230.0,"cat":"C4.1 DSL Cables"},
+{"pn":"504R20180","desc":"DSL Octal Cable, 8xRJ-45, 150ft/50m","price":317.0,"cat":"C4.1 DSL Cables"},
+{"pn":"504R20043","desc":"PWR/GND Harness 20ft/6m, 48VDC 18AWG","price":41.0,"cat":"C4.3 Power and Grounding cables"},
+{"pn":"504R20047","desc":"PWR/GND Harness 20ft/6m, 48VDC 14AWG","price":41.0,"cat":"C4.3 Power and Grounding cables"},
+{"pn":"504R20010","desc":"Craft i/f cable, DB-9 both ends, 12ft/3.6m","price":12.0,"cat":"C4.2 Service, Alarm, Clock and Misc. cables"},
+{"pn":"504R20060","desc":"Alarm Cable 50ft/15m, 24AWG, DB-15 one end","price":41.0,"cat":"C4.2 Service, Alarm, Clock and Misc. cables"},
+{"pn":"503R20270","desc":"Streaker Card for ML2300 and ML230","price":2300.0,"cat":"A4.5 CHS-2000 Related Items"},
+{"pn":"506R30060","desc":"Fan Control Module for CHS-200 (FCM-200)","price":633.0,"cat":"A4.4 CHS-200 Related Items"},
+{"pn":"506R61254","desc":"GL5010-10J2F","price":1185.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61252","desc":"GL5010-8J2F","price":1010.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R62107","desc":"GL5010-8J2F-P (PoE)","price":1190.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61253","desc":"GL5010-8J4F","price":1222.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61255","desc":"GL5020-8J4F-P (PoE)","price":1580.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61256","desc":"GL5020X-8J4F-P (PoE)","price":2519.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61257","desc":"GL5030X-8J4F","price":1780.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61258","desc":"GL5030X-8J4F-P (PoE)","price":1940.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61261","desc":"GL5030X-8J4F-P1 (PoE)","price":2359.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61262","desc":"GL5030X-8J4F-P2 (PoE)","price":2260.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61309","desc":"GL5060-16J4F-P (PoE)","price":2593.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61264","desc":"GL5060X-16J4F","price":2296.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61265","desc":"GL5060X-16J4F-P (PoE)","price":2750.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61263","desc":"GL5070X-8J12F","price":2140.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R62108","desc":"GL5080X-4J12F","price":4576.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R62011","desc":"ML5114D","price":1470.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R62012","desc":"ML5114DP","price":1499.0,"cat":"A5.1 Fiber DIN Rail L2 Switches"},
+{"pn":"506R61296","desc":"GL5010R-8J2F","price":1640.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R62106","desc":"GL5020R-8J4F-P (PoE)","price":2659.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61259","desc":"GL5030XR-8J4F","price":2550.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61260","desc":"GL5030XR-8J4F-P (PoE)","price":3113.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61306","desc":"GL5030XR-8J4F-P1 (PoE)","price":3230.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61267","desc":"GL5060XR-16J4F","price":3111.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61268","desc":"GL5060XR-16J4F-P (PoE)","price":3520.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61295","desc":"GL5070XR-8J12F","price":3150.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61270","desc":"GL5080XR-4J12F","price":5050.0,"cat":"A5.2 Fiber DIN Rail L3 Switches"},
+{"pn":"506R61286","desc":"GL6010X-24J4F-DC","price":2750.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61287","desc":"GL6010X-24J4F-AC","price":2950.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61271","desc":"GL6010X-24J4F-P-DC (PoE)","price":3520.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61272","desc":"GL6010X-24J4F-P-AC (PoE)","price":3720.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61277","desc":"GL6020-16J12FC-DC","price":3789.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61278","desc":"GL6020-16J12FC-AC","price":4009.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61283","desc":"GL6030-24J4F-P-DC (PoE)","price":3190.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61284","desc":"GL6030-24J4F-P-AC (PoE)","price":3330.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61280","desc":"GL6031-16J12FC-DC","price":2630.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61281","desc":"GL6031-16J12FC-AC","price":2950.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61289","desc":"GL6040X-8J28F-DC","price":3999.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61290","desc":"GL6040X-8J28F-AC","price":4320.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"501RG0530","desc":"ML530","price":920.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"501RG0252","desc":"ML540E","price":2295.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R62016","desc":"ML540M DC","price":1460.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R62006","desc":"ML540M AC","price":1680.0,"cat":"A5.3 Fiber Rackmount L2 Switches"},
+{"pn":"506R61274","desc":"GL6010XR-24J4F-P-DC (PoE)","price":4520.0,"cat":"A5.4 Fiber Rackmount L3 Switches"},
+{"pn":"506R61275","desc":"GL6010XR-24J4F-P-AC (PoE)","price":4850.0,"cat":"A5.4 Fiber Rackmount L3 Switches"},
+{"pn":"506R61292","desc":"GL6040XR-8J28F-DC","price":4810.0,"cat":"A5.4 Fiber Rackmount L3 Switches"},
+{"pn":"506R61293","desc":"GL6040XR-8J28F-AC","price":5130.0,"cat":"A5.4 Fiber Rackmount L3 Switches"},
+{"pn":"506R61332","desc":"GL7006-4J2F-P (PoE, In-Pole)","price":2800.0,"cat":"A5.5 Fiber In-Pole L2 Switches"},
+{"pn":"506R61329","desc":"GL7010-6J4F-P (PoE, In-Pole)","price":3050.0,"cat":"A5.5 Fiber In-Pole L2 Switches"},
+{"pn":"506R61330","desc":"GL7020-6J4F-P (PoE, In-Pole)","price":3328.0,"cat":"A5.5 Fiber In-Pole L2 Switches"},
+{"pn":"506R61331","desc":"GL7030-6J4F-P (PoE, In-Pole)","price":3790.0,"cat":"A5.5 Fiber In-Pole L2 Switches"},
+{"pn":"501RG0252","desc":"ML540E","price":2295.0,"cat":"A5.3 Fiber Rackmount L2 Switches"}];
 
 const DISCOUNTS = [{"cat":"A1.1 GL800 Solutions","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A1.2 GL9000 Headend Solutions","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.15,"emeaEndUser":0.1},{"cat":"A1.3 GL9000 CPEs","naReseller":0.1,"naEndUser":0.05,"regBonus":0.0,"emeaReseller":0.1,"emeaEndUser":0.05},{"cat":"A1.4 GL900 Headend Solutions","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.15,"emeaEndUser":0.1},{"cat":"A1.5 GL900 CPEs","naReseller":0.1,"naEndUser":0.05,"regBonus":0.0,"emeaReseller":0.1,"emeaEndUser":0.05},{"cat":"A2. ML600 Family","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A2.1 ML600D Family","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A3.1 Power Supplies for GL800/GL900/ML500/ML600/ML700","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A3.2 GL800/GL900ML500/ML600/ML700 Related Items","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A4.1 Shelves","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A4.2 SDU (Service Dispatch Units)","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A4.3 MLU (Multiport Line Units)","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A4.4 CHS-200 Related Items","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"A4.5 CHS-2000 Related Items","naReseller":0.33,"naEndUser":0.33,"regBonus":0.07,"emeaReseller":0.4,"emeaEndUser":0.3},{"cat":"C1. SFP Transceivers","naReseller":0.1,"naEndUser":0.0,"regBonus":0.0,"emeaReseller":0.1,"emeaEndUser":0.0},{"cat":"C4.1 DSL Cables","naReseller":0.1,"naEndUser":0.0,"regBonus":0.0,"emeaReseller":0.1,"emeaEndUser":0.0}];
 
@@ -54,6 +119,7 @@ const DEPLOY_TYPES = [
   { key: "PTMP_GL900", icon: "📡", label: "PTMP — GL900",       desc: "GL904/GL908/GL916 headend with GL91/GL91T/GL92 CPE endpoints." },
   { key: "PTMP_GL9000",icon: "🌐", label: "PTMP — GL9000",      desc: "GL9110C or GL9104C headend with GL93C CPEs. G.hn wave 2 over coax." },
   { key: "PTMP_ML230", icon: "🏗", label: "ML230 / ML2300",     desc: "Chassis platform. Pick chassis, SDU, MLU cards, cables and accessories individually or use a pre-built bundle." },
+  { key: "SWITCH_FIBER",icon:"🔀", label: "Fiber Switches",     desc: "GL5000 DIN Rail, GL6000 Rackmount, GL7000 In-Pole, ML5114, ML530/540 — single-unit fiber switch deployment." },
 ];
 
 // ─── WIZARD COMPONENT ─────────────────────────────────────────────────────────
@@ -80,18 +146,46 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
     glSfpPn:     null,
     glAcc:       {},
     // ML230 / ML2300
-    ml230mode:   "custom",    // "bundle" | "custom"
-    bundlePn:    null,
-    bundleQty:   1,
-    chassisPn:   null,
-    sduPn:       null,
-    mluPn:       null,
-    mluQty:      1,
-    cablePn:     null,
-    cableQty:    1,
-    ml230SfpPn:  null,
-    ml230SfpQty: 2,
-    ml230Acc:    {},
+    ml230mode:        "custom",  // "bundle" | "custom"
+    bundlePn:         null,
+    bundleQty:        1,
+    chassisPn:        null,
+    sduPn:            null,
+    sduRedundancy:    false,     // adds 2nd SDU
+    mluPn:            null,
+    mluQty:           1,
+    nodeCount:        1,         // multiply entire chassis BOM
+    // MLU copper cables
+    mluCableInclude:  false,
+    mluCableColor:    "US",      // "US" | "EU"
+    mluCableDistance: "100ft",   // "25ft" | "100ft" | "150ft"
+    // CHS-200 DSL cables (RJ-45)
+    chs200CableInclude: false,
+    chs200CablePn:    null,
+    chs200CableQty:   8,
+    // Uplink SFP
+    ml230SfpPn:       null,
+    ml230SfpQty:      2,
+    // Accessories
+    dcPowerCable:     false,     // PWR/GND harness
+    dcPowerGauge:     "18AWG",   // "18AWG" | "14AWG"
+    craftCable:       false,     // 504R20010
+    alarmCableLen:    "none",    // "none" | "50ft"
+    flashCard:        false,     // 550A00046
+    fanModule:        false,     // 506R30070 (CHS-2000B) or 506R30060 (CHS-200)
+    chs200AccKit:     false,     // 510K20230
+    streaker:         false,     // 503R20270
+    // Fiber Switches
+    swFamily:    null,   // "dinrail_l2"|"dinrail_l3"|"rack_l2"|"rack_l3"|"inpole"
+    swPn:        null,
+    swQty:       1,
+    swSfpPn:     null,
+    swSfpQty:    2,
+    swPsuInclude:false,
+    swPsuPn:     null,
+    swRackKit:   false,
+    swWallKit:   false,
+    swAccKit:    false,
   });
 
   const set = (k, v) => setSel(prev => ({ ...prev, [k]: v }));
@@ -166,34 +260,130 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
     }
 
     else if (type === "PTMP_ML230") {
+      const n = sel.nodeCount || 1;
+      const isCHS2000 = sel.chassisPn === "502R02110";
+
       if (sel.ml230mode === "bundle") {
         const b = P(sel.bundlePn);
         if (b) items.push({ ...b, qty: sel.bundleQty });
       } else {
+        // Chassis
         const chassis = P(sel.chassisPn);
-        if (chassis) items.push({ ...chassis, qty: 1 });
+        if (chassis) items.push({ ...chassis, qty: n });
+
+        // SDU (+ optional redundant 2nd SDU)
         const sdu = P(sel.sduPn);
-        if (sdu) items.push({ ...sdu, qty: 1 });
+        if (sdu) {
+          items.push({ ...sdu, qty: n });
+          if (sel.sduRedundancy) items.push({ ...sdu, desc: sdu.desc + " (Redundant)", qty: n });
+        }
+
+        // MLU
         const mlu = P(sel.mluPn);
-        if (mlu) items.push({ ...mlu, qty: sel.mluQty });
-        const cable = P(sel.cablePn);
-        if (cable) items.push({ ...cable, qty: sel.cableQty });
+        if (mlu) items.push({ ...mlu, qty: sel.mluQty * n });
+
+        // MLU Copper Cables — CHS-2000B uses 64-pair DIN cables
+        if (isCHS2000 && sel.mluCableInclude) {
+          // Map color+distance to SKU
+          const cableMap = {
+            "US-25ft":  "504R60060",
+            "US-100ft": "504R60062",
+            "US-150ft": "504R60063",
+            "EU-100ft": "504R60088", // FCI connector, US code (closest EU equiv)
+            "EU-25ft":  "504R60060", // fallback
+            "EU-150ft": "504R60063", // fallback
+          };
+          const cableKey = `${sel.mluCableColor}-${sel.mluCableDistance}`;
+          const cablePn = cableMap[cableKey] || "504R60062";
+          const cableProd = P(cablePn);
+          if (cableProd) items.push({ ...cableProd, qty: sel.mluQty * n });
+        }
+
+        // CHS-200 DSL cables (RJ-45 based)
+        if (!isCHS2000 && sel.chs200CableInclude && sel.chs200CablePn) {
+          const cableProd = P(sel.chs200CablePn);
+          if (cableProd) items.push({ ...cableProd, qty: sel.chs200CableQty * n });
+        }
+
+        // Uplink SFP
         if (sel.ml230SfpPn) {
           const sfp = P(sel.ml230SfpPn);
-          if (sfp) items.push({ ...sfp, qty: sel.ml230SfpQty });
+          if (sfp) items.push({ ...sfp, qty: sel.ml230SfpQty * n });
         }
-        Object.entries(sel.ml230Acc).forEach(([pn, on]) => {
-          if (!on) return;
-          const prod = P(pn);
-          if (prod) items.push({ ...prod, qty: 1 });
-        });
+
+        // DC Power Cable
+        if (sel.dcPowerCable) {
+          const dcPn = sel.dcPowerGauge === "14AWG" ? "504R20047" : "504R20043";
+          const dc = P(dcPn);
+          if (dc) items.push({ ...dc, qty: n });
+        }
+
+        // Craft cable
+        if (sel.craftCable) {
+          const cc = P("504R20010");
+          if (cc) items.push({ ...cc, qty: n });
+        }
+
+        // Alarm cable
+        if (sel.alarmCableLen === "50ft") {
+          const al = P("504R20060");
+          if (al) items.push({ ...al, qty: n });
+        }
+
+        // Flash card
+        if (sel.flashCard) {
+          const fc = P("550A00046");
+          if (fc) items.push({ ...fc, qty: n });
+        }
+
+        // Fan module
+        if (sel.fanModule) {
+          const fanPn = isCHS2000 ? "506R30070" : "506R30060";
+          const fan = P(fanPn);
+          if (fan) items.push({ ...fan, qty: n });
+        }
+
+        // CHS-200 accessories kit
+        if (!isCHS2000 && sel.chs200AccKit) {
+          const ak = P("510K20230");
+          if (ak) items.push({ ...ak, qty: n });
+        }
+
+        // Streaker card
+        if (sel.streaker) {
+          const str = P("503R20270");
+          if (str) items.push({ ...str, qty: n });
+        }
+      }
+    }
+
+    else if (type === "SWITCH_FIBER") {
+      const sw = P(sel.swPn);
+      if (sw) items.push({ ...sw, qty: sel.swQty });
+      if (sel.swSfpPn) {
+        const sfp = P(sel.swSfpPn);
+        if (sfp) items.push({ ...sfp, qty: sel.swSfpQty * sel.swQty });
+      }
+      if (sel.swPsuInclude && sel.swPsuPn) {
+        const psu = P(sel.swPsuPn);
+        if (psu) items.push({ ...psu, qty: sel.swQty });
+      }
+      if (sel.swRackKit) {
+        const rk = P("510R21070");
+        if (rk) items.push({ ...rk, qty: Math.ceil(sel.swQty / 2) });
+      }
+      if (sel.swWallKit) {
+        const wk = P("510R21080");
+        if (wk) items.push({ ...wk, qty: sel.swQty });
+      }
+      if (sel.swAccKit) {
+        const ak = P("510K00060");
+        if (ak) items.push({ ...ak, qty: sel.swQty });
       }
     }
 
     return items;
   }, [sel, type, isNA]);
-
-  const bomLines  = useMemo(() => makeLines(bom, rid, custType, dealReg), [bom, rid, custType, dealReg]);
   const bomTotal  = bomLines.reduce((s, l) => s + l.price * l.qty * (1 - l.discount), 0);
   const bomList   = bomLines.reduce((s, l) => s + l.price * l.qty, 0);
 
@@ -205,7 +395,8 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
     PTMP_GL800:  ["Type","Headend","CPEs","SFPs","Accessories","Review"],
     PTMP_GL900:  ["Type","Headend","CPEs","SFPs","Accessories","Review"],
     PTMP_GL9000: ["Type","Headend","CPEs","SFPs","Accessories","Review"],
-    PTMP_ML230:  ["Type","Mode","Components","Cables & SFPs","Accessories","Review"],
+    PTMP_ML230:    ["Type","Mode","Components","Cables & SFPs","Accessories","Review"],
+    SWITCH_FIBER:  ["Type","Family & Model","SFPs","Power & Accessories","Review"],
   };
   const steps = type ? (STEP_LABELS[type] || []) : ["Type"];
 
@@ -223,6 +414,9 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
         if (sel.ml230mode === "bundle") return !!sel.bundlePn;
         return !!sel.chassisPn && !!sel.sduPn && !!sel.mluPn;
       }
+    }
+    if (type === "SWITCH_FIBER") {
+      if (step === 1) return !!sel.swPn;
     }
     return true;
   };
@@ -249,16 +443,24 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
   const GL9000_CPES= ["506R61337","506R61336"];
 
   const ML230_BUNDLES = [
-    { pn:"501S20436", label:"ML230: CHS-200 + SDU-450  + MLU-64DR" },
-    { pn:"501S20441", label:"ML230: CHS-200 + SDU-450  + MLU-64DF" },
-    { pn:"501S20443", label:"ML230: CHS-200 + SDU-450  + MLU-32DR" },
+    // ML230 (CHS-200)
     { pn:"501S20442", label:"ML230: CHS-200 + SDU-450  + MLU-32DF" },
+    { pn:"501S20443", label:"ML230: CHS-200 + SDU-450  + MLU-32DR" },
+    { pn:"501S20441", label:"ML230: CHS-200 + SDU-450  + MLU-64DF" },
+    { pn:"501S20436", label:"ML230: CHS-200 + SDU-450  + MLU-64DR" },
+    { pn:"501S20445", label:"ML230: CHS-200 + SDU-450G + MLU-32DF" },
+    { pn:"501S20446", label:"ML230: CHS-200 + SDU-450G + MLU-32DR" },
     { pn:"501S20444", label:"ML230: CHS-200 + SDU-450G + MLU-64DF" },
-    { pn:"501S20435", label:"ML2300: CHS-2000B + SDU-450  + MLU-64DR" },
-    { pn:"501S20447", label:"ML2300: CHS-2000B + SDU-450  + MLU-64DF" },
-    { pn:"501S20449", label:"ML2300: CHS-2000B + SDU-450  + MLU-32DR" },
+    { pn:"501S20456", label:"ML230: CHS-200 + SDU-450G + MLU-64DR" },
+    // ML2300 (CHS-2000B)
     { pn:"501S20448", label:"ML2300: CHS-2000B + SDU-450  + MLU-32DF" },
+    { pn:"501S20449", label:"ML2300: CHS-2000B + SDU-450  + MLU-32DR" },
+    { pn:"501S20447", label:"ML2300: CHS-2000B + SDU-450  + MLU-64DF" },
+    { pn:"501S20435", label:"ML2300: CHS-2000B + SDU-450  + MLU-64DR" },
+    { pn:"501S20451", label:"ML2300: CHS-2000B + SDU-450G + MLU-32DF" },
+    { pn:"501S20452", label:"ML2300: CHS-2000B + SDU-450G + MLU-32DR" },
     { pn:"501S20450", label:"ML2300: CHS-2000B + SDU-450G + MLU-64DF" },
+    { pn:"501S20455", label:"ML2300: CHS-2000B + SDU-450G + MLU-64DR" },
   ];
 
   return (
@@ -591,9 +793,13 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
               {/* SDU */}
               <div style={{ marginBottom:14 }}>
                 <Label>SDU (Service Dispatcher Unit)</Label>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
-                  {["503R60042","503R60043"].map(pn => <ProdBtn key={pn} pn={pn} selected={sel.sduPn} onSelect={pn=>set("sduPn",pn)} region={region} custType={custType} dealReg={dealReg} />)}
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:8 }}>
+                  {["503R60042","503R60043","503R60041"].map(pn => <ProdBtn key={pn} pn={pn} selected={sel.sduPn} onSelect={pn=>set("sduPn",pn)} region={region} custType={custType} dealReg={dealReg} />)}
                 </div>
+                {sel.sduPn && (
+                  <AccRow pn={sel.sduPn} label="SDU Redundancy (add 2nd SDU)" hint="Backup SDU — same model"
+                    checked={sel.sduRedundancy} onChange={v=>set("sduRedundancy",v)} />
+                )}
               </div>
 
               {/* MLU */}
@@ -609,32 +815,116 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
                   </div>
                 )}
               </div>
+
+              {/* Node Count */}
+              <div style={{ marginTop:16, padding:"12px 14px", background:"#EFF6FF", borderRadius:8, border:"1px solid #BFDBFE" }}>
+                <Label>Number of Identical Nodes</Label>
+                <div style={{ fontSize:12, color:"#3B82F6", marginBottom:8 }}>Multiplies all components by this count (for deploying multiple identical chassis).</div>
+                <Counter v={sel.nodeCount} min={1} max={50} set={v=>set("nodeCount",v)} />
+              </div>
             </div>
           )}
 
           {/* ── ML230: Step 3 — Cables & SFPs ── */}
           {step === 3 && type === "PTMP_ML230" && (
             <div>
-              <StepHeader title="DSL Cables & SFPs" sub="Select DSL connection cables and optional uplink SFP." />
+              <StepHeader
+                title="Cables & SFPs"
+                sub={sel.chassisPn === "502R02110"
+                  ? "CHS-2000B uses 64-pair DIN connector cables to connect MLUs to the MDF."
+                  : "CHS-200 uses standard RJ-45 octal/quad cables."} />
 
               {sel.ml230mode === "custom" && (
                 <>
-                  <div style={{ marginBottom:14 }}>
-                    <Label>DSL Cable Type</Label>
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:8 }}>
-                      {["504R20110","504R20120"].map(pn => <ProdBtn key={pn} pn={pn} selected={sel.cablePn} onSelect={pn=>set("cablePn",pn)} region={region} custType={custType} dealReg={dealReg} />)}
+                  {/* ── CHS-2000B: 64-pair DIN MLU Copper Cables ── */}
+                  {sel.chassisPn === "502R02110" && (
+                    <div style={{ marginBottom:16 }}>
+                      <AccRow pn="504R60062" label="Include MLU Copper Cables?" hint="64-pair DIN connector — 1 cable per MLU"
+                        checked={sel.mluCableInclude} onChange={v=>set("mluCableInclude",v)} />
+                      {sel.mluCableInclude && (
+                        <div style={{ marginLeft:12, padding:"12px 14px", background:"#F8FAFC", borderRadius:8, border:"1px solid #E2E8F0", marginTop:6 }}>
+                          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
+                            <div>
+                              <Label>Cable Coloring Scheme</Label>
+                              <div style={{ display:"flex", gap:6 }}>
+                                {["US","EU"].map(c => (
+                                  <button key={c} onClick={()=>set("mluCableColor",c)}
+                                    style={{ flex:1, padding:"7px", borderRadius:6, border:`2px solid ${sel.mluCableColor===c?"#D97706":"#E2E8F0"}`, background:sel.mluCableColor===c?"#FFFBEB":"white", cursor:"pointer", fontWeight:700, fontSize:13, color:"#1A2035" }}>
+                                    {c} Color Code
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <Label>Max Distance to MDF</Label>
+                              <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                                {["25ft","100ft","150ft"].map(d => (
+                                  <button key={d} onClick={()=>set("mluCableDistance",d)}
+                                    style={{ flex:1, padding:"7px", borderRadius:6, border:`2px solid ${sel.mluCableDistance===d?"#D97706":"#E2E8F0"}`, background:sel.mluCableDistance===d?"#FFFBEB":"white", cursor:"pointer", fontWeight:700, fontSize:13, color:"#1A2035" }}>
+                                    {d}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Preview selected cable SKU */}
+                          {(() => {
+                            const cableMap = {"US-25ft":"504R60060","US-100ft":"504R60062","US-150ft":"504R60063","EU-100ft":"504R60088","EU-25ft":"504R60060","EU-150ft":"504R60063"};
+                            const pn = cableMap[`${sel.mluCableColor}-${sel.mluCableDistance}`] || "504R60062";
+                            const prod = P(pn);
+                            return prod ? (
+                              <div style={{ padding:"8px 10px", background:"white", borderRadius:6, border:"1px solid #E2E8F0", fontSize:12 }}>
+                                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                                  <span style={{ color:"#1A2035", fontWeight:600 }}>{prod.desc}</span>
+                                  <span style={{ fontWeight:700, color:"#0B1D3A" }}>{$(prod.price)} × {sel.mluQty*(sel.nodeCount||1)}</span>
+                                </div>
+                                <code style={{ fontSize:10, color:"#94A3B8" }}>{pn}</code>
+                              </div>
+                            ) : null;
+                          })()}
+                        </div>
+                      )}
                     </div>
-                    {sel.cablePn && (
-                      <div>
-                        <Label>Cable Quantity</Label>
-                        <Counter v={sel.cableQty} min={0} max={50} set={v=>set("cableQty",v)} />
-                      </div>
-                    )}
-                  </div>
+                  )}
+
+                  {/* ── CHS-200: RJ-45 DSL Cables ── */}
+                  {sel.chassisPn === "502R20230" && (
+                    <div style={{ marginBottom:16 }}>
+                      <AccRow pn="504R20120" label="Include MLU DSL Cables?" hint="RJ-45 octal/quad cables — qty auto-set per MLU"
+                        checked={sel.chs200CableInclude} onChange={v=>set("chs200CableInclude",v)} />
+                      {sel.chs200CableInclude && (
+                        <div style={{ marginLeft:12, padding:"12px 14px", background:"#F8FAFC", borderRadius:8, border:"1px solid #E2E8F0", marginTop:6 }}>
+                          <Label>Cable Type & Distance</Label>
+                          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:10 }}>
+                            {[
+                              { pn:"504R20110", label:"Quad 4×RJ-45  10ft/3m" },
+                              { pn:"504R20140", label:"Quad 4×RJ-45  100ft/30m" },
+                              { pn:"504R20120", label:"Octal 8×RJ-45 10ft/3m" },
+                              { pn:"504R20160", label:"Octal 8×RJ-45 100ft/30m" },
+                              { pn:"504R20180", label:"Octal 8×RJ-45 150ft/50m" },
+                            ].map(opt => (
+                              <button key={opt.pn} onClick={()=>set("chs200CablePn",opt.pn)}
+                                style={{ textAlign:"left", padding:"8px 10px", borderRadius:7, border:`2px solid ${sel.chs200CablePn===opt.pn?"#D97706":"#E2E8F0"}`, background:sel.chs200CablePn===opt.pn?"#FFFBEB":"white", cursor:"pointer" }}>
+                                <div style={{ fontSize:12, fontWeight:600, color:"#1A2035" }}>{opt.label}</div>
+                                <div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
+                                  <code style={{ fontSize:10, color:"#94A3B8" }}>{opt.pn}</code>
+                                  <span style={{ fontSize:11, fontWeight:700, color:"#0B1D3A" }}>{$(P(opt.pn)?.price)}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          <Label>Cable Quantity</Label>
+                          <Counter v={sel.chs200CableQty} min={1} max={64} set={v=>set("chs200CableQty",v)} />
+                          <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>Tip: MLU-64 needs 8 octal cables; MLU-32 needs 4 octal or 8 quad cables.</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
 
-              <div>
+              {/* ── Uplink SFP ── */}
+              <div style={{ marginBottom:0 }}>
                 <Label>Uplink SFP (optional)</Label>
                 <div style={{ marginBottom:8 }}>
                   <button onClick={()=>set("ml230SfpPn",null)}
@@ -667,16 +957,253 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
           {/* ── ML230: Step 4 — Accessories ── */}
           {step === 4 && type === "PTMP_ML230" && (
             <div>
-              <StepHeader title="Accessories" sub="Optional add-ons for the chassis configuration." />
-              {[
-                { pn:"550A00046", label:"Flash Card for SDU-450/G" },
-                { pn:"510K20230", label:"Accessories Kit for CHS-200", hide: sel.chassisPn === "502R02110" },
-                { pn:"506R30070", label:"Fan Control Module for CHS-2000B", hide: sel.chassisPn === "502R20230" },
-              ].filter(a => !a.hide).map(acc => (
-                <AccRow key={acc.pn} pn={acc.pn} label={acc.label} checked={!!sel.ml230Acc[acc.pn]} onChange={v=>setAcc("ml230Acc",acc.pn,v)} />
-              ))}
+              <StepHeader title="Additional Accessories" sub="Optional cables, modules and add-ons for the chassis." />
+
+              {/* DC Power Cable */}
+              <div style={{ marginBottom:8 }}>
+                <AccRow pn="504R20043" label="Include DC Power Cable (PWR/GND Harness)" hint="48VDC open-ended, 20ft/6m"
+                  checked={sel.dcPowerCable} onChange={v=>set("dcPowerCable",v)} />
+                {sel.dcPowerCable && (
+                  <div style={{ marginLeft:12, display:"flex", gap:6, marginBottom:8 }}>
+                    {[["18AWG","504R20043","18AWG — lighter duty"],["14AWG","504R20047","14AWG — heavier duty"]].map(([gauge,pn,hint])=>(
+                      <button key={gauge} onClick={()=>set("dcPowerGauge",gauge)}
+                        style={{ flex:1, padding:"7px 10px", borderRadius:6, border:`2px solid ${sel.dcPowerGauge===gauge?"#D97706":"#E2E8F0"}`, background:sel.dcPowerGauge===gauge?"#FFFBEB":"white", cursor:"pointer", textAlign:"left" }}>
+                        <div style={{ fontWeight:700, fontSize:12, color:"#1A2035" }}>{gauge}</div>
+                        <div style={{ display:"flex", justifyContent:"space-between" }}>
+                          <span style={{ fontSize:10, color:"#64748B" }}>{hint}</span>
+                          <span style={{ fontSize:11, fontWeight:700, color:"#0B1D3A" }}>{$(P(pn)?.price)}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Craft cable */}
+              <AccRow pn="504R20010" label="Include Craft Cable" hint="DB-9 both ends, 12ft/3.6m — 1 per node"
+                checked={sel.craftCable} onChange={v=>set("craftCable",v)} />
+
+              {/* Alarm cable */}
+              <div style={{ marginBottom:8 }}>
+                <div style={{ fontSize:12, fontWeight:600, color:"#1A2035", marginBottom:4 }}>Alarm Cable</div>
+                <div style={{ display:"flex", gap:6 }}>
+                  {[["none","None","No alarm cable"],["50ft","50ft / 15m","504R20060 — DB-15 one end"]].map(([v,l,h])=>(
+                    <button key={v} onClick={()=>set("alarmCableLen",v)}
+                      style={{ flex:1, padding:"8px 10px", borderRadius:6, border:`2px solid ${sel.alarmCableLen===v?"#D97706":"#E2E8F0"}`, background:sel.alarmCableLen===v?"#FFFBEB":"white", cursor:"pointer", textAlign:"left" }}>
+                      <div style={{ fontWeight:700, fontSize:12, color:"#1A2035" }}>{l}</div>
+                      <div style={{ fontSize:10, color:"#64748B" }}>{h}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Flash card */}
+              <AccRow pn="550A00046" label="Flash Card for SDU-450/G" hint="1 per node"
+                checked={sel.flashCard} onChange={v=>set("flashCard",v)} />
+
+              {/* Fan module */}
+              {sel.chassisPn === "502R02110" && (
+                <AccRow pn="506R30070" label="Fan Control Module for CHS-2000B" hint="1 per chassis"
+                  checked={sel.fanModule} onChange={v=>set("fanModule",v)} />
+              )}
+              {sel.chassisPn === "502R20230" && (
+                <AccRow pn="506R30060" label="Fan Control Module for CHS-200 (FCM-200)" hint="1 per chassis"
+                  checked={sel.fanModule} onChange={v=>set("fanModule",v)} />
+              )}
+
+              {/* CHS-200 accessories kit */}
+              {sel.chassisPn === "502R20230" && (
+                <AccRow pn="510K20230" label="Accessories Kit for CHS-200" hint="1 per chassis"
+                  checked={sel.chs200AccKit} onChange={v=>set("chs200AccKit",v)} />
+              )}
+
+              {/* Streaker card */}
+              <AccRow pn="503R20270" label="Streaker Card (ML2300/ML230)" hint="Signal splitter/probe — 1 per chassis"
+                checked={sel.streaker} onChange={v=>set("streaker",v)} />
             </div>
           )}
+
+          {/* ── SWITCH_FIBER: Step 1 — Family & Model ── */}
+          {step === 1 && type === "SWITCH_FIBER" && (() => {
+            const SW_FAMILIES = [
+              { key:"dinrail_l2", label:"DIN Rail L2",    desc:"GL5010/5020/5030/5060/5070/5080, ML5114 — industrial DIN rail mounting" },
+              { key:"dinrail_l3", label:"DIN Rail L3",    desc:"GL5010R/5020R/5030XR/5060XR/5070XR/5080XR — Layer 3 routing" },
+              { key:"rack_l2",    label:"Rackmount L2",   desc:"GL6010X/6020/6030/6031/6040X, ML530/540 — 19\" rack switch" },
+              { key:"rack_l3",    label:"Rackmount L3",   desc:"GL6010XR/6040XR — Layer 3 rackmount" },
+              { key:"inpole",     label:"In-Pole",        desc:"GL7006/7010/7020/7030 — outdoor sealed IP enclosure" },
+            ];
+            const SW_MODELS = {
+              dinrail_l2: [
+                ["GL5010 Series",["506R61252","506R61254","506R62107","506R61253"]],
+                ["GL5020 Series",["506R61255","506R61256"]],
+                ["GL5030X Series",["506R61257","506R61258","506R61261","506R61262"]],
+                ["GL5060 Series",["506R61309","506R61264","506R61265"]],
+                ["GL5070/5080",["506R61263","506R62108"]],
+                ["ML5114",["506R62011","506R62012"]],
+              ],
+              dinrail_l3: [
+                ["GL5010R/5020R",["506R61296","506R62106"]],
+                ["GL5030XR Series",["506R61259","506R61260","506R61306"]],
+                ["GL5060XR/5070XR/5080XR",["506R61267","506R61268","506R61295","506R61270"]],
+              ],
+              rack_l2: [
+                ["GL6010X Series",["506R61286","506R61287","506R61271","506R61272"]],
+                ["GL6020/6030/6031",["506R61277","506R61278","506R61283","506R61284","506R61280","506R61281"]],
+                ["GL6040X Series",["506R61289","506R61290"]],
+                ["ML530 / ML540",["501RG0530","501RG0252","506R62016","506R62006"]],
+              ],
+              rack_l3: [
+                ["GL6010XR Series",["506R61274","506R61275"]],
+                ["GL6040XR Series",["506R61292","506R61293"]],
+              ],
+              inpole: [
+                ["GL7000 In-Pole",["506R61332","506R61329","506R61330","506R61331"]],
+              ],
+            };
+            return (
+              <div>
+                <StepHeader title="Select Switch Family & Model" sub="Choose the product family, then the specific model." />
+                {/* Family selector */}
+                <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:16 }}>
+                  {SW_FAMILIES.map(f => (
+                    <button key={f.key} onClick={()=>{ set("swFamily",f.key); set("swPn",null); }}
+                      style={{ padding:"8px 12px", borderRadius:7, border:`2px solid ${sel.swFamily===f.key?"#D97706":"#E2E8F0"}`, background:sel.swFamily===f.key?"#FFFBEB":"white", cursor:"pointer", textAlign:"left" }}>
+                      <div style={{ fontWeight:700, fontSize:12, color:"#1A2035" }}>{f.label}</div>
+                      <div style={{ fontSize:10, color:"#64748B", maxWidth:160 }}>{f.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                {/* Model selector */}
+                {sel.swFamily && (SW_MODELS[sel.swFamily]||[]).map(([grp, pns]) => (
+                  <div key={grp} style={{ marginBottom:10 }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:"#64748B", textTransform:"uppercase", marginBottom:5 }}>{grp}</div>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5 }}>
+                      {pns.map(pn => <ProdBtn key={pn} pn={pn} selected={sel.swPn} onSelect={pn=>set("swPn",pn)} region={region} custType={custType} dealReg={dealReg} />)}
+                    </div>
+                  </div>
+                ))}
+                {sel.swPn && (
+                  <div style={{ marginTop:12 }}>
+                    <Label>Quantity</Label>
+                    <Counter v={sel.swQty} min={1} max={200} set={v=>set("swQty",v)} />
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* ── SWITCH_FIBER: Step 2 — SFPs ── */}
+          {step === 2 && type === "SWITCH_FIBER" && (
+            <div>
+              <StepHeader title="SFP Transceivers" sub="Optional. Select fiber SFP module for uplink/fiber ports. Qty is per switch × unit count." />
+              <div style={{ marginBottom:10 }}>
+                <button onClick={()=>set("swSfpPn",null)}
+                  style={{ padding:"7px 14px", borderRadius:6, border:`2px solid ${!sel.swSfpPn?"#D97706":"#E2E8F0"}`, background:!sel.swSfpPn?"#FFFBEB":"white", cursor:"pointer", fontSize:13, fontWeight:600, color:"#1A2035" }}>
+                  No SFP required
+                </button>
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:10 }}>
+                {SFP_OPTIONS.map(s => (
+                  <button key={s.pn} onClick={()=>set("swSfpPn",s.pn)}
+                    style={{ textAlign:"left", padding:"8px 10px", borderRadius:7, border:`2px solid ${sel.swSfpPn===s.pn?"#D97706":"#E2E8F0"}`, background:sel.swSfpPn===s.pn?"#FFFBEB":"white", cursor:"pointer" }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:"#1A2035" }}>{s.desc}</div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
+                      <code style={{ fontSize:10, color:"#94A3B8" }}>{s.pn}</code>
+                      <span style={{ fontSize:11, fontWeight:700, color:"#0B1D3A" }}>{$(P(s.pn)?.price)}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {sel.swSfpPn && (
+                <div>
+                  <Label>SFP Quantity (per switch × {sel.swQty} unit{sel.swQty>1?"s":""})</Label>
+                  <Counter v={sel.swSfpQty} min={1} max={28} set={v=>set("swSfpQty",v)} />
+                  <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>Total SFPs added: <b>{sel.swSfpQty * sel.swQty}</b></div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── SWITCH_FIBER: Step 3 — Power & Accessories ── */}
+          {step === 3 && type === "SWITCH_FIBER" && (() => {
+            const isDIN    = sel.swFamily === "dinrail_l2" || sel.swFamily === "dinrail_l3";
+            const isRack   = sel.swFamily === "rack_l2" || sel.swFamily === "rack_l3";
+            const isML530  = sel.swPn === "501RG0530" || sel.swPn === "501RG0252" || sel.swPn === "506R62016" || sel.swPn === "506R62006";
+            const selDesc  = P(sel.swPn)?.desc || "";
+            const hasPoE   = selDesc.includes("-P") && !selDesc.includes("-P/");
+            const isAC     = selDesc.includes("-AC") || selDesc.includes("AC");
+
+            // PSU options for DIN Rail
+            const dinPsuOptions = [
+              { pn: isNA?"506R61185":"506R61184", label: `DIN Rail 24VDC PSU${isNA?" + US":" + EU"} Cables`, note:"Standard (no PoE)" },
+              { pn: "506R61181", label: "DIN Rail 24VDC PSU (no cables)", note:"Use with existing cable" },
+              { pn: "506R61191", label: "DIN Rail 48VDC PSU with PoE", note:"Required for -P models" },
+            ];
+            // PSU for ML530 / ML540
+            const mlPsuOptions = [
+              { pn: isNA?"506R00006":"506R00006E", label: `AC-DC PSU for ML530/ML540 (${isNA?"NA":"EU"})`, note:"1 per unit" },
+            ];
+
+            return (
+              <div>
+                <StepHeader title="Power Supply & Accessories" sub="Select external PSU if needed and optional mounting kits." />
+
+                {/* DIN Rail PSU */}
+                {isDIN && (
+                  <div style={{ marginBottom:14 }}>
+                    <AccRow pn={isNA?"506R61185":"506R61184"} label="Include External DIN Rail PSU?" hint={hasPoE ? "Recommend 48VDC PoE PSU for -P models" : "24VDC PSU for standard models"}
+                      checked={sel.swPsuInclude} onChange={v=>set("swPsuInclude",v)} />
+                    {sel.swPsuInclude && (
+                      <div style={{ marginLeft:12, display:"flex", flexDirection:"column", gap:5, marginTop:5 }}>
+                        {dinPsuOptions.map(opt => (
+                          <button key={opt.pn} onClick={()=>set("swPsuPn",opt.pn)}
+                            style={{ textAlign:"left", padding:"8px 12px", borderRadius:7, border:`2px solid ${sel.swPsuPn===opt.pn?"#D97706":"#E2E8F0"}`, background:sel.swPsuPn===opt.pn?"#FFFBEB":"white", cursor:"pointer" }}>
+                            <div style={{ display:"flex", justifyContent:"space-between" }}>
+                              <span style={{ fontWeight:600, fontSize:12, color:"#1A2035" }}>{opt.label}</span>
+                              <span style={{ fontSize:12, fontWeight:700, color:"#0B1D3A" }}>{$(P(opt.pn)?.price)}</span>
+                            </div>
+                            <div style={{ fontSize:10, color:"#64748B" }}>{opt.note} · <code style={{fontSize:10}}>{opt.pn}</code></div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ML530/ML540 PSU */}
+                {isML530 && (
+                  <div style={{ marginBottom:14 }}>
+                    <AccRow pn={isNA?"506R00006":"506R00006E"} label={`Include AC-DC Power Supply (${isNA?"NA":"EU"})?`} hint="1 per unit"
+                      checked={sel.swPsuInclude} onChange={v=>{ set("swPsuInclude",v); set("swPsuPn", isNA?"506R00006":"506R00006E"); }} />
+                  </div>
+                )}
+
+                {/* DC Rackmount — AC models have built-in PSU, note for DC */}
+                {isRack && !isML530 && (
+                  <div style={{ marginBottom:14, padding:"10px 12px", background: isAC?"#F0FDF4":"#FFF7ED", borderRadius:8, border:`1px solid ${isAC?"#BBF7D0":"#FED7AA"}` }}>
+                    <div style={{ fontSize:12, fontWeight:700, color: isAC?"#15803D":"#B45309" }}>
+                      {isAC ? "✓ AC Model — Built-in Power Supply" : "⚠ DC Model — Requires external 48VDC power source"}
+                    </div>
+                    <div style={{ fontSize:11, color:"#64748B", marginTop:2 }}>
+                      {isAC ? "No external PSU required." : "Connect to site DC power bus or external supply."}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mounting kits */}
+                {isML530 && (
+                  <>
+                    <AccRow pn="510R21070" label="Rack Mount Sleeve Kit (holds 2 units)" hint="Mounts 2 ML530 side-by-side in 19 inch rack"
+                      checked={sel.swRackKit} onChange={v=>set("swRackKit",v)} />
+                    <AccRow pn="510R21080" label="Wall Mount Kit" hint="1 per unit"
+                      checked={sel.swWallKit} onChange={v=>set("swWallKit",v)} />
+                    <AccRow pn="510K00060" label="Accessories Kit for ML530/ML600" hint="1 per unit"
+                      checked={sel.swAccKit} onChange={v=>set("swAccKit",v)} />
+                  </>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── REVIEW: last step for all types ── */}
           {step === steps.length - 1 && type && (
@@ -1124,8 +1651,8 @@ export default function QuoteApp(){
                         {ov&&<span style={{fontSize:15,color:A}} title="Overridden">✎</span>}
                       </div>
                       <span style={{fontSize:15,fontWeight:700,color:N,textAlign:"right"}}>{$M(cp)}</span>
-                      <button onClick={()=>rm(l.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#CBD5E1",fontSize:15,padding:0}}
-                        onMouseEnter={e=>e.target.style.color="#EF4444"} onMouseLeave={e=>e.target.style.color="#CBD5E1"}>×</button>
+                      <button onClick={()=>rm(l.id)} title="Remove line" style={{background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:4,cursor:"pointer",color:"#EF4444",fontSize:14,padding:"2px 5px",fontWeight:700,lineHeight:1}}
+                        onMouseEnter={e=>{e.currentTarget.style.background="#EF4444";e.currentTarget.style.color="white";}} onMouseLeave={e=>{e.currentTarget.style.background="#FEF2F2";e.currentTarget.style.color="#EF4444";}}>✕</button>
                     </div>
                   );
                 })}
