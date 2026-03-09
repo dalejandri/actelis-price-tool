@@ -749,6 +749,11 @@ export default function QuoteApp(){
           {[["📥 Import PDF",false],["⬇ Excel",false],["🔗 HubSpot",false]].map(([l,p])=>(
             <button key={l} style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:p?A:"#1E3A5F",color:p?"white":"#94A3B8",border:"none"}}>{l}</button>
           ))}
+          <button onClick={()=>setShowAdmin(true)}
+            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",
+              background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
+            ⚙ Admin
+          </button>
           <button onClick={exportPdf} disabled={exporting}
             style={{padding:"6px 16px",borderRadius:5,fontSize:14,fontWeight:700,cursor:exporting?"wait":"pointer",
               background:exporting?"#92400E":"#D97706",color:"white",border:"none",opacity:exporting?0.8:1,
