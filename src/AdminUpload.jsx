@@ -3,35 +3,46 @@ import { useState, useEffect, useCallback, useRef } from "react";
 const N = "#0B1D3A", A = "#D97706", B = "#E2E8F0", T = "#1A2035", M = "#64748B";
 
 
-// ── XLSX parser — handles the Actelis Price_List_Letter.xlsx format ───────────
+// ── XLSX parser — handles PriceList.xlsx flat format ─────────────────────────
+// Expected columns: Category | Part Num | Description | Comments | LP $
 function processXLSX(rows, type) {
   if (type !== "pricelist") throw new Error("XLSX import is supported for Price List only. Use CSV for discounts.");
 
-  const items = [];
-  let currentCat = "";
+  if (rows.length < 2) throw new Error("File appears empty.");
 
-  for (const row of rows) {
-    const catCol   = String(row[2] || "").trim();
-    const pnCol    = String(row[3] || "").trim();
-    const descCol  = String(row[4] || "").trim();
-    const priceCol = row[6];
-
-    // Category header row (has category but no part number)
-    if (catCol && catCol !== "Category" && !pnCol) {
-      currentCat = catCol;
-      continue;
-    }
-
-    // Product row
-    if (pnCol && descCol && priceCol !== "" && priceCol !== null) {
-      const price = parsePrice(String(priceCol));
-      if (price > 0) {
-        items.push({ pn: pnCol, desc: descCol, price, cat: currentCat });
-      }
+  // Detect header row — find row with "Part Num" or "Part Number"
+  let headerIdx = 0;
+  for (let i = 0; i < Math.min(5, rows.length); i++) {
+    const row = rows[i].map(v => String(v||"").toLowerCase());
+    if (row.some(v => v.includes("part num") || v.includes("part #"))) {
+      headerIdx = i;
+      break;
     }
   }
 
-  if (items.length === 0) throw new Error("No products found — check the file format. Expected: Category in col C, Part# in col D, Description in col E, Price in col G.");
+  const headers = rows[headerIdx].map(v => String(v||"").trim().toLowerCase());
+  const iCat   = headers.findIndex(h => h.includes("cat"));
+  const iPn    = headers.findIndex(h => h.includes("part"));
+  const iDesc  = headers.findIndex(h => h.includes("desc"));
+  const iPrice = headers.findIndex(h => h.includes("lp") || h.includes("price") || h.includes("list"));
+
+  if (iPn < 0 || iDesc < 0 || iPrice < 0)
+    throw new Error(`Could not find required columns. Found: ${rows[headerIdx].join(", ")}
+Expected: Category, Part Num, Description, LP $`);
+
+  const items = [];
+  for (const row of rows.slice(headerIdx + 1)) {
+    const pn    = String(row[iPn]  || "").trim();
+    const desc  = String(row[iDesc]|| "").trim();
+    const cat   = String(row[iCat >= 0 ? iCat : 0] || "").trim();
+    const price = parsePrice(String(row[iPrice] || ""));
+    if (pn && desc && price > 0) {
+      items.push({ pn, desc, price, cat });
+    }
+  }
+
+  if (items.length === 0)
+    throw new Error("No products found. Make sure the file has columns: Category, Part Num, Description, LP $");
   return items;
 }
 
@@ -293,7 +304,7 @@ export default function AdminUpload({ onClose, currentPrices, currentDiscounts, 
           {/* Help text */}
           <div style={{ background:"#EFF6FF", border:"1px solid #BFDBFE", borderRadius:7, padding:"10px 14px", marginBottom:16, fontSize:12, color:"#1E40AF" }}>
             {tab === "pricelist" ? (<>
-              <b>Recommended:</b> Upload <code>Price_List_Letter.xlsx</code> directly — it's auto-detected and parsed.<br/>Also accepts <code>TablesPrice_List.csv</code> from Access export.
+              <b>Recommended:</b> Upload <code>PriceList.xlsx</code> — columns: Category, Part Num, Description, Comments, LP $<br/>Also accepts <code>Price_List_Letter.xlsx</code> or <code>TablesPrice_List.csv</code>.
             </>) : (<>
               <b>Expected columns:</b> Category, naReseller, naEndUser, regBonus, emeaReseller, emeaEndUser
               <br/>Values should be decimals (e.g. 0.33 = 33%). Export from <code>TablesDiscounts.csv</code>.
