@@ -1405,6 +1405,7 @@ let _quid=1000;
 
 export default function QuoteApp(){
   const[qn,setQn]=useState("");const[cust,setCust]=useState("");const[cont,setCont]=useState("");
+  const[addr,setAddr]=useState("");const[phone,setPhone]=useState("");const[email,setEmail]=useState("");
   const[qby,setQby]=useState("");const[dt,setDt]=useState(TDM());const[exp,setExp]=useState(ADM(TDM(),30));
   const[reg,setReg]=useState(REGIONS_MAIN[0]);const[ct,setCt]=useState("Reseller");const[dr,setDr]=useState(false);
   const[pay,setPay]=useState("Net 30 days");const[ship,setShip]=useState("ExWorks");const[stat,setStat]=useState("New");
@@ -1440,15 +1441,25 @@ export default function QuoteApp(){
   const exportPdf = useCallback(() => {
     setExporting(true);
     try {
+      const hwLns  = lines.filter(l => !l.cat?.startsWith("D"));
+      const svcLns = lines.filter(l =>  l.cat?.startsWith("D"));
+      const hwBase = hwLns.reduce((s,l)=>s+l.listPrice*l.qty*(1-l.discount),0);
       exportQuotePDF({
         quote_num: qn || "DRAFT", status: stat, quoted_by: qby,
-        date: dt, expiry: exp, customer: cust, contact: cont,
+        date: dt, expiry: exp,
+        customer: cust, contact: cont, address: addr, phone, email,
         customer_type: ct, region: reg.name, payment: pay,
         shipping: ship, deal_reg: dr, comments: cmts,
-        lines: lines.map(l => ({
+        lines: hwLns.map(l => ({
           pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
-          list_price: l.listPrice, discount: l.discount,
-          site: l.site || "", is_svc: !!(l.isD), svc_string: l.lpStr || "",
+          list_price: l.listPrice, discount: l.discount, site: l.site || "",
+        })),
+        svc_lines: svcLns.map(l => ({
+          pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
+          list_price: l.listPrice,
+          // listPrice < 1 means it's a percentage of hw total
+          pct: l.listPrice < 1 && l.listPrice > 0 ? l.listPrice : 0,
+          hw_base: hwBase,
         })),
         add_ship: aShip, add_cc: aCC, add_tax: aTax, tax_rate: tax,
       });
@@ -1457,7 +1468,7 @@ export default function QuoteApp(){
     } finally {
       setExporting(false);
     }
-  }, [qn, stat, qby, dt, exp, cust, cont, ct, reg, pay, ship, dr, cmts, lines, aShip, aCC, aTax, tax]);
+  }, [qn, stat, qby, dt, exp, cust, cont, addr, phone, email, ct, reg, pay, ship, dr, cmts, lines, aShip, aCC, aTax, tax]);
 
 
 
@@ -1553,6 +1564,9 @@ export default function QuoteApp(){
                 ["Customer Name",<input style={inp} value={cust} onChange={e=>setCust(e.target.value)} placeholder="Company name"/>,"*"],
                 ["Contact",<input style={inp} value={cont} onChange={e=>setCont(e.target.value)} placeholder="Contact name"/>,""],
                 ["Customer Type",<select style={inp} value={ct} onChange={e=>setCt(e.target.value)}><option>Reseller</option><option>End Customer</option></select>,""],
+                ["Address",<input style={inp} value={addr} onChange={e=>setAddr(e.target.value)} placeholder="Customer address"/>,""],
+                ["Phone/Fax",<input style={inp} value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Phone number"/>,""],
+                ["Email",<input style={inp} value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address"/>,""],
                 ["Quote Date",<input type="date" style={inp} value={dt} onChange={e=>{setDt(e.target.value);setExp(ADM(e.target.value,30));}}/>,""],
                 ["Expiry Date",<input type="date" style={inp} value={exp} onChange={e=>setExp(e.target.value)}/>,""],
                 ["Region",<select style={inp} value={reg.name} onChange={e=>setReg(REGIONS_MAIN.find(r=>r.name===e.target.value))}>{REGIONS_MAIN.map(r=><option key={r.name}>{r.name}</option>)}</select>,""],
