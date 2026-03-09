@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const N = "#0B1D3A", A = "#D97706", B = "#E2E8F0", T = "#1A2035", M = "#64748B";
 
