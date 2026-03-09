@@ -1921,6 +1921,144 @@
       "desc": "RFT-V UpConverter Line Card",
       "price": 426,
       "cat": "C6. Remote Line Powered System (X-Pod/Tyco)"
+    },
+    {
+      "pn": "SVC-REMEXT",
+      "desc": "Extended Telephone assistance for 3 years",
+      "price": 3,
+      "cat": "D1.2 Extended TAC - Warranty – Valid ONLY at time of product purchase"
+    },
+    {
+      "pn": "SVC-ADVREP",
+      "desc": "Advanced HW Replacement Service",
+      "price": 5,
+      "cat": "D2.1 Extended HW & SW Warranty"
+    },
+    {
+      "pn": "SVC-SWSEC",
+      "desc": "EMS and embedded security and vulnerability fixes",
+      "price": 6,
+      "cat": "D2.1 Extended HW & SW Warranty"
+    },
+    {
+      "pn": "SVC-EXTHW1",
+      "desc": "Extended FR&R HW Warranty, each Yr",
+      "price": 2,
+      "cat": "D2.1 Extended HW & SW Warranty"
+    },
+    {
+      "pn": "SVC-FSTHW3",
+      "desc": "Fast Exchange Hardware Warranty, each Year",
+      "price": 3,
+      "cat": "D2.1 Extended HW & SW Warranty"
+    },
+    {
+      "pn": "SVC-REM1YR",
+      "desc": "Telephone assistance, per year",
+      "price": 1.5,
+      "cat": "D2.1 Extended HW & SW Warranty"
+    },
+    {
+      "pn": "SVC-EMSEOS",
+      "desc": "Telephone assistance, per year for EOL EMS versions within 1 year of EOL notice, contingent upon an upgrade order being placed.",
+      "price": 2,
+      "cat": "D2.1 Extended HW & SW Warranty"
+    },
+    {
+      "pn": "SVC-REM247",
+      "desc": "Upgrade to 24x7 Telephone Assistance",
+      "price": 2,
+      "cat": "D2.1 Extended HW & SW Warranty"
+    },
+    {
+      "pn": "SVC-BRONZE",
+      "desc": "Bronze Support",
+      "price": 4,
+      "cat": "D2.2 Bundled Annual Support Programs"
+    },
+    {
+      "pn": "SVC-GOLD+",
+      "desc": "Gold Plus Support",
+      "price": 9,
+      "cat": "D2.2 Bundled Annual Support Programs"
+    },
+    {
+      "pn": "SVC-GOLD",
+      "desc": "Gold Support",
+      "price": 6,
+      "cat": "D2.2 Bundled Annual Support Programs"
+    },
+    {
+      "pn": "SVC-PLAT",
+      "desc": "Platinum Support",
+      "price": 8,
+      "cat": "D2.2 Bundled Annual Support Programs"
+    },
+    {
+      "pn": "SVC-SWMTC",
+      "desc": "Embedded Software Maintenance Service",
+      "price": 350,
+      "cat": "D2.3 Unbundled Annual Support Programs"
+    },
+    {
+      "pn": "SVC-EXTEMS",
+      "desc": "Extended EMS Warranty, per year",
+      "price": 30,
+      "cat": "D2.3 Unbundled Annual Support Programs"
+    },
+    {
+      "pn": "SVC-SWUPDT",
+      "desc": "Embedded Software Upgrade Service",
+      "price": 20,
+      "cat": "D2.4 Non-Contracted Services (Per-event, Time and Material basis)"
+    },
+    {
+      "pn": "EMSL00103",
+      "desc": "EMS Upgrade License",
+      "price": 50,
+      "cat": "D2.4 Non-Contracted Services (Per-event, Time and Material basis)"
+    },
+    {
+      "pn": "SVC-TMFRR",
+      "desc": "Standard HW Repair and Return Service",
+      "price": 20,
+      "cat": "D2.4 Non-Contracted Services (Per-event, Time and Material basis)"
+    },
+    {
+      "pn": "SVC-NETANA",
+      "desc": "Network Analysis",
+      "price": 350,
+      "cat": "D2.5 Professional Services - EF and I Services"
+    },
+    {
+      "pn": "SVC-ONSINS",
+      "desc": "Onsite Installation Assistance",
+      "price": 2500,
+      "cat": "D2.5 Professional Services - EF and I Services"
+    },
+    {
+      "pn": "SVC-NTWKPL",
+      "desc": "Pre-Sales Network Planning and Design",
+      "price": 200,
+      "cat": "D2.5 Professional Services - EF and I Services"
+    },
+    {
+      "pn": "SVC-TRNACT",
+      "desc": "Instructor-led Formal training at Actelis",
+      "price": 1400,
+      "cat": "D2.6 Professional Services - Educational Services (Training)"
+    },
+    {
+      "pn": "SVC-TRNCUS",
+      "desc": "Onsite training at the customer's premise",
+      "price": 1,
+      "cat": "D2.6 Professional Services - Educational Services (Training)"
+    },
+    {
+      "pn": "SVC-WEBTRN",
+      "desc": "Web-based training",
+      "price": 1200,
+      "cat": "D2.6 Professional Services - Educational Services (Training)"
     }
   ],
   "discounts": [
