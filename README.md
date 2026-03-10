@@ -37,7 +37,7 @@ git push -u origin main
 ### Step 4 — Done ✓
 The GitHub Action runs automatically on every push to `main`.  
 Your tool will be live at:  
-**`https://YOUR_USERNAME.github.io/actelis-price-tool/`**
+**`https://dalejandri.github.io/actelis-price-tool/`**
 
 Check progress under **Actions** tab in your repo.
 
@@ -50,7 +50,7 @@ Add an HTML block to any page or post:
 
 ```html
 <iframe
-  src="https://YOUR_USERNAME.github.io/actelis-price-tool/"
+  src="https://dalejandri.github.io/actelis-price-tool/"
   style="width:100%; height:900px; border:none; border-radius:8px;"
   title="Actelis Price Tool"
   loading="lazy">
