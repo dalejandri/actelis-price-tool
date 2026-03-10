@@ -42,8 +42,36 @@ function drawFooter(doc) {
   doc.text("V3.21", W - 10, H - 5, { align:"right" });
 }
 
-// Amber A + navy "ctelis" italic logo
-function drawLogo(doc, x, y) {
+// Fetch logo as base64 (called once at export time)
+async function fetchLogoBase64() {
+  try {
+    const res  = await fetch("https://actelis.com/wp-content/uploads/2021/10/a_logo-1.gif");
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result); // data:image/gif;base64,...
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null; // fall back to text logo
+  }
+}
+
+// Draw logo: real image if available, else amber-A text fallback
+function drawLogo(doc, x, y, logoDataUrl) {
+  if (logoDataUrl) {
+    // Image: ~52mm wide × ~18mm tall (matches original PDF proportions)
+    try {
+      doc.addImage(logoDataUrl, "GIF", x, y - 14, 52, 18);
+    } catch {
+      drawLogoText(doc, x, y);
+    }
+  } else {
+    drawLogoText(doc, x, y);
+  }
+}
+
+function drawLogoText(doc, x, y) {
   doc.setFont("helvetica", "bolditalic");
   doc.setFontSize(28);
   doc.setTextColor(...AMBER);
@@ -51,11 +79,9 @@ function drawLogo(doc, x, y) {
   const aW = doc.getTextWidth("A");
   doc.setTextColor(...NAVY);
   doc.text("ctelis", x + aW - 1, y);
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(7);
-  doc.setTextColor(...MUTED);
-  doc.text("Adaptive Broadband Access", x, y + 5.5);
 }
+
+const TAGLINE = "Gigabit-class performance to everyone, and everything, everywhere";
 
 // Company address block, right-aligned at x
 function drawAddress(doc, x, y) {
@@ -75,7 +101,7 @@ function drawAddress(doc, x, y) {
   });
 }
 
-export function exportQuotePDF(quote) {
+export async function exportQuotePDF(quote) {
   const doc = new jsPDF({ unit:"mm", format:"letter", compress:true });
   const W   = doc.internal.pageSize.getWidth();
   const ML  = 14;
@@ -83,10 +109,19 @@ export function exportQuotePDF(quote) {
   const CW  = W - ML - MR;
   const qn  = quote.quote_num || "DRAFT";
 
+  // Fetch logo before building (async)
+  const logoDataUrl = await fetchLogoBase64();
+
   drawFooter(doc);
 
   // ── HEADER ────────────────────────────────────────────────────────────────
-  drawLogo(doc, ML, 20);
+  drawLogo(doc, ML, 22, logoDataUrl);
+
+  // Tagline below logo
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(6.5);
+  doc.setTextColor(...MUTED);
+  doc.text(TAGLINE, ML, 29);
   drawAddress(doc, W - MR, 10);
 
   // Amber + thin grey double-rule

@@ -1443,55 +1443,72 @@ function ImportPdfModal({ priceList, discounts, onImport, onClose }) {
         fullText   += tc.items.map(i => i.str).join(" ") + "\n";
       }
 
-      // ── Extract header fields ──────────────────────────────────────────
+      // ── Smarter field extraction ───────────────────────────────────────
+      // pdf.js merges the two-column header into one stream.
+      // Strategy: find each labelled value by stopping before the NEXT known label.
+      const STOP = "Customer\\s*Contact|Customer\\s*Name|Quotation|Address:|Phone(?:/Fax)?:|Email:|Date:|Quote\\s*Valid|Payment\\s*Terms|Shipping\\s*Terms|Quoted\\s*By|Site\\s*Name|Part\\s*Number";
       const grab = (pattern) => { const m = fullText.match(pattern); return m ? m[1].trim() : ""; };
+      const cleanVal = (s, max=60) => s.replace(/\b(?:Customer Contact|Address|Phone(?:\/Fax)?|Email|Date|Quote Valid Until|Payment Terms|Shipping Terms|Quoted By)\b.*$/si,"").replace(/\s+/g," ").trim().substring(0,max);
 
-      const qn   = grab(/Quotation\s*#[:\s]+([^\s]+(?:\s+[^\s]+)?)/i);
-      const cust = grab(/Customer\s*Name[:\s]+(.+?)(?=Customer\s*Contact|Address:|Phone|Date:|$)/si)
-                     .replace(/\s+/g," ").substring(0,60);
-      const cont = grab(/Customer\s*Contact[:\s]+(.+?)(?=Address:|Phone|Email:|$)/si)
-                     .replace(/\s+/g," ").substring(0,60);
-      const addr = grab(/Address[:\s]+(.+?)(?=Phone\/Fax|Phone:|Email:|Date:|$)/si)
-                     .replace(/\s+/g," ").substring(0,80);
-      const phone= grab(/Phone(?:\/Fax)?[:\s]+(.+?)(?=Email:|Date:|$)/si)
-                     .replace(/\s+/g," ").substring(0,40);
-      const email= grab(/Email[:\s]+(.+?)(?=Date:|Quote Valid|$)/si)
-                     .replace(/\s+/g," ").substring(0,60);
-      const qby  = grab(/Quoted\s*By[:\s]+(.+?)(?=Site|Part\s*Number|$)/si)
-                     .replace(/\s+/g," ").substring(0,40);
-      const dtRaw = grab(/Date[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i);
-      const expRaw= grab(/Quote\s*Valid\s*Until[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i);
-      const pay  = grab(/Payment\s*Terms[:\s]+(.+?)(?=Shipping|$)/si)
-                     .replace(/\s+/g," ").substring(0,40) || "Net 30 days";
-      const ship = grab(/Shipping\s*Terms[:\s]+(.+?)(?=Quoted|Part\s*Number|$)/si)
-                     .replace(/\s+/g," ").substring(0,40) || "FOB";
+      // Quotation # — grab everything up to first space-separated word after label, stop at known labels
+      const qnRaw = grab(/Quotation\s*#[:\s]+(.+?)(?=Customer\s*Name|Customer\s*Contact|Date:|$)/si);
+      const qn    = cleanVal(qnRaw, 60);
 
-      // ── Extract line items — find rows like "501RG0106 ... $1,170.00  26  $30,420.00" ──
-      const linePattern = /([A-Z0-9]{6,20})\s+(.+?)\s+\$([0-9,]+\.?\d*)\s+(\d+)\s+\$([0-9,]+\.?\d*)/g;
+      // Customer Name — stop before any other label
+      const custRaw = grab(/Customer\s*Name[:\s]+(.+?)(?=Customer\s*Contact|Quotation|Address:|Phone|Date:|$)/si);
+      const cust    = cleanVal(custRaw, 60);
+
+      // Contact — value directly after label, stop before next label
+      const contRaw = grab(/Customer\s*Contact[:\s]+(.+?)(?=Address:|Phone|Email:|Date:|Quotation|$)/si);
+      // If the value looks like just a label word, it's blank in source PDF
+      const cont = /^(Address|Phone|Email|Date|Quote)/.test(contRaw.trim()) ? "" : cleanVal(contRaw, 60);
+
+      const addrRaw = grab(/Address[:\s]+(.+?)(?=Phone(?:\/Fax)?:|Email:|Date:|Quote|$)/si);
+      const addr = /^(Phone|Email|Date|Quote)/.test(addrRaw.trim()) ? "" : cleanVal(addrRaw, 80);
+
+      const phoneRaw = grab(/Phone(?:\/Fax)?[:\s]+(.+?)(?=Email:|Date:|Quote|$)/si);
+      const phone = /^(Email|Date|Quote)/.test(phoneRaw.trim()) ? "" : cleanVal(phoneRaw, 40);
+
+      const emailRaw = grab(/Email[:\s]+(.+?)(?=Date:|Quote\s*Valid|Payment|$)/si);
+      const email = /^(Date|Quote|Payment)/.test(emailRaw.trim()) ? "" : cleanVal(emailRaw, 60);
+
+      const qby  = cleanVal(grab(/Quoted\s*By[:\s]+(.+?)(?=Site|Part\s*Number|$)/si), 40);
+
+      const dtRaw  = grab(/(?<!\/)Date[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i);
+      const expRaw = grab(/Quote\s*Valid\s*Until[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i);
+
+      const payRaw = grab(/Payment\s*Terms[:\s]+(.+?)(?=Shipping|Quoted|$)/si);
+      const pay    = cleanVal(payRaw, 40) || "Net 30 days";
+
+      const shipRaw = grab(/Shipping\s*Terms[:\s]+(.+?)(?=Quoted|Part\s*Number|$)/si);
+      const ship    = cleanVal(shipRaw, 40) || "FOB";
+
+      // ── Extract line items ─────────────────────────────────────────────
+      // Actelis HW PNs: 3 digits + uppercase letter + more alphanumeric (e.g. 506R61254, 501RG0106)
+      // Service PNs: SVC- prefix
+      // Explicitly EXCLUDE pure-digit strings (like "092324" from quote number)
+      const PN_RE = /(?:^|\s)((?:\d{3}[A-Z][A-Z0-9]{2,}|SVC-[A-Z0-9]+))\s+(.+?)\s+\$([\d,]+\.?\d*)\s+(\d+)\s+\$([\d,]+\.?\d*)/g;
       const parsedLines = [];
       let m;
-      while ((m = linePattern.exec(fullText)) !== null) {
+      while ((m = PN_RE.exec(fullText)) !== null) {
         const pn      = m[1];
         const descRaw = m[2].trim();
         const unitP   = parseFloat(m[3].replace(/,/g,""));
         const qty     = parseInt(m[4]);
-        // Skip known total rows
-        if (pn.match(/^(SVC|Total|Grand)/i)) continue;
-        if (descRaw.toLowerCase().startsWith("total")) continue;
 
-        // Find catalog match for list price & discount
+        // Skip totals rows
+        if (/^(Total|Grand)/i.test(pn)) continue;
+        if (/^total/i.test(descRaw)) continue;
+
+        // Look up in catalog for canonical desc + list price
         const cat    = priceList.find(p => p.pn === pn);
         const lp     = cat?.price || unitP;
-        const disc   = lp > 0 ? Math.round((1 - unitP/lp)*1000)/1000 : 0;
-        const safeDisc = disc >= 0 && disc < 1 ? disc : 0;
-
-        // Extract desc without trailing numbers and dollar signs
-        const desc = descRaw.replace(/\$[\d,]+\.?\d*/g,"").replace(/\s+/g," ").trim().substring(0,120)
-                    || cat?.desc || descRaw.substring(0,80);
+        const disc   = lp > 0 ? Math.max(0, Math.min(0.99, Math.round((1 - unitP/lp)*1000)/1000)) : 0;
+        const desc   = cat?.desc || descRaw.replace(/\$([\d,]+\.?\d*)/g,"").replace(/\s+/g," ").trim().substring(0,120);
 
         parsedLines.push({
           pn, desc, cat: cat?.cat || "A. Custom",
-          qty, listPrice: lp, discount: safeDisc, site: "",
+          qty, listPrice: lp, discount: disc, site: "",
         });
       }
 
@@ -1725,38 +1742,35 @@ export default function QuoteApp(){
 
   const [exporting, setExporting] = useState(false);
 
-  const exportPdf = useCallback(() => {
+  const exportPdf = useCallback(async () => {
     setExporting(true);
-    // Use setTimeout so React can re-render the "Generating…" state before jsPDF blocks
-    setTimeout(() => {
-      try {
-        const hwLns  = lines.filter(l => !l.cat?.startsWith("D"));
-        const svcLns = lines.filter(l =>  l.cat?.startsWith("D"));
-        const hwBase = hwLns.reduce((s,l)=>s+l.listPrice*l.qty*(1-l.discount),0);
-        exportQuotePDF({
-          quote_num: qn || "DRAFT", status: stat, quoted_by: qby,
-          date: dt, expiry: exp,
-          customer: cust, contact: cont, address: addr, phone, email,
-          customer_type: ct, region: reg.name, payment: pay,
-          shipping: ship, deal_reg: dr, comments: cmts,
-          lines: hwLns.map(l => ({
-            pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
-            list_price: l.listPrice, discount: l.discount, site: l.site || "",
-          })),
-          svc_lines: svcLns.map(l => ({
-            pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
-            list_price: l.listPrice,
-            pct: l.listPrice < 1 && l.listPrice > 0 ? l.listPrice : 0,
-            hw_base: hwBase,
-          })),
-          add_ship: aShip, add_cc: aCC, add_tax: aTax, tax_rate: tax,
-        });
-      } catch(err) {
-        alert("PDF export failed: " + err.message);
-      } finally {
-        setExporting(false);
-      }
-    }, 80);
+    try {
+      const hwLns  = lines.filter(l => !l.cat?.startsWith("D"));
+      const svcLns = lines.filter(l =>  l.cat?.startsWith("D"));
+      const hwBase = hwLns.reduce((s,l)=>s+l.listPrice*l.qty*(1-l.discount),0);
+      await exportQuotePDF({
+        quote_num: qn || "DRAFT", status: stat, quoted_by: qby,
+        date: dt, expiry: exp,
+        customer: cust, contact: cont, address: addr, phone, email,
+        customer_type: ct, region: reg.name, payment: pay,
+        shipping: ship, deal_reg: dr, comments: cmts,
+        lines: hwLns.map(l => ({
+          pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
+          list_price: l.listPrice, discount: l.discount, site: l.site || "",
+        })),
+        svc_lines: svcLns.map(l => ({
+          pn: l.pn, desc: l.desc, cat: l.cat, qty: l.qty,
+          list_price: l.listPrice,
+          pct: l.listPrice < 1 && l.listPrice > 0 ? l.listPrice : 0,
+          hw_base: hwBase,
+        })),
+        add_ship: aShip, add_cc: aCC, add_tax: aTax, tax_rate: tax,
+      });
+    } catch(err) {
+      alert("PDF export failed: " + err.message);
+    } finally {
+      setExporting(false);
+    }
   }, [qn, stat, qby, dt, exp, cust, cont, addr, phone, email, ct, reg, pay, ship, dr, cmts, lines, aShip, aCC, aTax, tax]);
 
   // ── Excel export ──────────────────────────────────────────────────────────
