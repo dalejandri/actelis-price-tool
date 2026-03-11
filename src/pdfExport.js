@@ -5,6 +5,7 @@
  */
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import actelisLogoUrl from "./assets/actelis-logo.png";
 
 const NAVY   = [11,  29,  58];
 const AMBER  = [217, 119,  6];
@@ -42,38 +43,42 @@ function drawFooter(doc) {
   doc.text("V3.21", W - 10, H - 5, { align:"right" });
 }
 
-// Fetch logo as base64 (called once at export time)
-async function fetchLogoBase64() {
-  try {
-    const res  = await fetch("https://actelis.com/wp-content/uploads/2021/10/a_logo-1.gif");
-    const blob = await res.blob();
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result); // data:image/gif;base64,...
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null; // fall back to text logo
-  }
+// Convert logo to PNG via canvas so jsPDF can embed it cleanly
+async function fetchLogoPng() {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width  = img.naturalWidth  || 300;
+        canvas.height = img.naturalHeight || 90;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      } catch { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = actelisLogoUrl;   // Vite-resolved URL — always correct
+    setTimeout(() => resolve(null), 4000);
+  });
 }
 
-// Draw logo: real image if available, else amber-A text fallback
-function drawLogo(doc, x, y, logoDataUrl) {
-  if (logoDataUrl) {
-    // Image: ~52mm wide × ~18mm tall (matches original PDF proportions)
+// Draw logo: real PNG image if available, else styled text fallback
+function drawLogo(doc, x, y, logoPng) {
+  if (logoPng) {
     try {
-      doc.addImage(logoDataUrl, "GIF", x, y - 14, 52, 18);
-    } catch {
-      drawLogoText(doc, x, y);
-    }
-  } else {
-    drawLogoText(doc, x, y);
+      // Width ~55mm, height proportional (~18mm for the GIF aspect ratio)
+      doc.addImage(logoPng, "PNG", x, y - 16, 55, 20);
+      return;
+    } catch { /* fall through */ }
   }
+  drawLogoText(doc, x, y);
 }
 
 function drawLogoText(doc, x, y) {
+  // Styled italic text logo matching the Actelis brand
   doc.setFont("helvetica", "bolditalic");
-  doc.setFontSize(28);
+  doc.setFontSize(26);
   doc.setTextColor(...AMBER);
   doc.text("A", x, y);
   const aW = doc.getTextWidth("A");
@@ -109,13 +114,13 @@ export async function exportQuotePDF(quote) {
   const CW  = W - ML - MR;
   const qn  = quote.quote_num || "DRAFT";
 
-  // Fetch logo before building (async)
-  const logoDataUrl = await fetchLogoBase64();
+  // Fetch logo before building (async, canvas → PNG)
+  const logoPng = await fetchLogoPng();
 
   drawFooter(doc);
 
   // ── HEADER ────────────────────────────────────────────────────────────────
-  drawLogo(doc, ML, 22, logoDataUrl);
+  drawLogo(doc, ML, 22, logoPng);
 
   // Tagline below logo
   doc.setFont("helvetica", "italic");
