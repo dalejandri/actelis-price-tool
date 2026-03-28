@@ -92,12 +92,21 @@ function getDisc(cat, rid, ct, dr) {
   return v;
 }
 
-function makeLines(bomItems, rid, ct, dr) {
-  return bomItems.map(item => ({
-    ...item,
-    listPrice: item.price || 0,
-    discount:  getDisc(item.cat, rid, ct, dr),
-  }));
+function makeLines(bomItems, rid, ct, dr, replacements) {
+  const repl = replacements || {};
+  return bomItems.map(item => {
+    // Apply PN replacement if one exists for this item
+    const newPn = repl[item.pn];
+    const newItem = newPn
+      ? (PRICE_LIST.find(p=>p.pn===newPn) || item)
+      : item;
+    return {
+      ...newItem,
+      qty:       item.qty,     // preserve original qty
+      listPrice: newItem.price || 0,
+      discount:  getDisc(newItem.cat, rid, ct, dr),
+    };
+  });
 }
 
 // ─── SFP options ──────────────────────────────────────────────────────────────
@@ -124,7 +133,7 @@ const DEPLOY_TYPES = [
 ];
 
 // ─── WIZARD COMPONENT ─────────────────────────────────────────────────────────
-function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
+function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClose }) {
   const [type, setType]   = useState(null);
   const [step, setStep]   = useState(0);
 
@@ -386,7 +395,7 @@ function NodeWizard({ region, custType, dealReg, onAddLines, onClose }) {
     return items;
   }, [sel, type, isNA]);
 
-  const bomLines  = useMemo(() => makeLines(bom, rid, custType, dealReg), [bom, rid, custType, dealReg]);
+  const bomLines  = useMemo(() => makeLines(bom, rid, custType, dealReg, replacements), [bom, rid, custType, dealReg, replacements]);
   const bomTotal  = bomLines.reduce((s, l) => s + l.price * l.qty * (1 - l.discount), 0);
   const bomList   = bomLines.reduce((s, l) => s + l.price * l.qty, 0);
 
@@ -1705,6 +1714,149 @@ function CustomLineModal({ onAdd, onClose }) {
   );
 }
 
+// ─── PN REPLACEMENTS MANAGER ─────────────────────────────────────────────────
+function ReplaceModal({ priceList, services, replacements, onSave, onClose }) {
+  const allItems = [...(priceList||[]), ...(services||[])];
+  const findP = pn => allItems.find(x=>x.pn===pn);
+  const [pairs, setPairs] = useState(
+    Object.entries(replacements||{}).map(([oldPn,newPn])=>({oldPn,newPn,id:Math.random()}))
+  );
+  const [oldQ,  setOldQ]  = useState("");
+  const [newQ,  setNewQ]  = useState("");
+  const [oldRes,setOldRes]= useState([]);
+  const [newRes,setNewRes]= useState([]);
+  const [pOld,  setPOld]  = useState(null);
+  const [pNew,  setPNew]  = useState(null);
+
+  const search = q => !q.trim() ? [] :
+    allItems.filter(p=>p.pn.toLowerCase().includes(q.toLowerCase())||p.desc.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+
+  const inp = {width:"100%",padding:"7px 9px",border:"1px solid #E2E8F0",borderRadius:6,fontSize:12,outline:"none",boxSizing:"border-box",background:"white"};
+  const OV  = {position:"fixed",inset:0,zIndex:1002,background:"rgba(11,29,58,0.78)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(3px)"};
+  const BOX = {background:"white",borderRadius:12,width:"min(660px,96vw)",maxHeight:"90vh",overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 24px 80px rgba(0,0,0,0.35)"};
+
+  const addPair = () => {
+    if (!pOld || !pNew || pOld.pn===pNew.pn) return;
+    setPairs(prev=>[...prev.filter(p=>p.oldPn!==pOld.pn), {oldPn:pOld.pn, newPn:pNew.pn, id:Math.random()}]);
+    setPOld(null); setPNew(null); setOldQ(""); setNewQ(""); setOldRes([]); setNewRes([]);
+  };
+
+  const save = () => {
+    const obj={};
+    pairs.forEach(({oldPn,newPn})=>{ obj[oldPn]=newPn; });
+    onSave(obj);
+  };
+
+  const PickBox = ({q,setQ,res,setRes,picked,setPicked,label,color}) => (
+    <div style={{position:"relative",flex:1}}>
+      <div style={{fontSize:10,fontWeight:700,color:"#64748B",marginBottom:3,textTransform:"uppercase",letterSpacing:"0.05em"}}>{label}</div>
+      {picked ? (
+        <div style={{padding:"7px 9px",background:color==="amber"?"#FFF7ED":"#F0FDF4",border:`1px solid ${color==="amber"?"#D97706":"#10B981"}`,borderRadius:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <code style={{fontSize:12,fontWeight:700,color:color==="amber"?"#92400E":"#065F46"}}>{picked.pn}</code>
+            <div style={{fontSize:11,color:color==="amber"?"#78350F":"#047857"}}>{picked.desc?.substring(0,42)}</div>
+            <div style={{fontSize:10,color:"#94A3B8"}}>{picked.price?`$${picked.price?.toFixed(2)}`:"svc"} · {picked.cat?.substring(0,30)}</div>
+          </div>
+          <button onClick={()=>{setPicked(null);setQ("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:"#94A3B8",padding:"0 4px"}}>×</button>
+        </div>
+      ) : (
+        <>
+          <input style={inp} value={q} placeholder={`Search ${label.toLowerCase()}...`}
+            onChange={e=>{setQ(e.target.value);setRes(search(e.target.value));}} />
+          {res.length>0&&<div style={{position:"absolute",zIndex:20,top:"100%",left:0,right:0,background:"white",border:"1px solid #E2E8F0",borderRadius:7,boxShadow:"0 4px 16px rgba(0,0,0,0.12)",maxHeight:170,overflowY:"auto",marginTop:2}}>
+            {res.map(p=>(
+              <div key={p.pn} onClick={()=>{setPicked(p);setRes([]);setQ("");}} style={{padding:"6px 10px",cursor:"pointer",borderBottom:"1px solid #F8FAFC",fontSize:12}}
+                onMouseEnter={e=>e.currentTarget.style.background="#F8FAFC"} onMouseLeave={e=>e.currentTarget.style.background="white"}>
+                <code style={{fontWeight:700,color:"#0B1D3A"}}>{p.pn}</code>
+                <span style={{color:"#64748B",marginLeft:8,fontSize:11}}>{p.desc?.substring(0,44)}</span>
+                {p.price&&<span style={{color:"#10B981",marginLeft:8,fontWeight:600}}>${p.price?.toFixed(2)}</span>}
+              </div>
+            ))}
+          </div>}
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={OV} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div style={BOX}>
+        {/* Header */}
+        <div style={{background:"#0B1D3A",padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+          <div>
+            <div style={{color:"#D97706",fontWeight:800,fontSize:14,letterSpacing:"0.06em"}}>🔄 PART NUMBER REPLACEMENTS</div>
+            <div style={{color:"#64748B",fontSize:11,marginTop:2}}>When an old PN appears in a quote or wizard, the new PN replaces it automatically.</div>
+          </div>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#64748B",fontSize:22,cursor:"pointer"}}>×</button>
+        </div>
+
+        <div style={{padding:16,overflowY:"auto",flex:1}}>
+          {/* Add rule */}
+          <div style={{padding:14,background:"#F8FAFC",borderRadius:8,border:"1px solid #E2E8F0",marginBottom:16}}>
+            <div style={{fontWeight:700,fontSize:11,color:"#475569",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.06em"}}>Add New Replacement Rule</div>
+            <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}>
+              <PickBox q={oldQ} setQ={setOldQ} res={oldRes} setRes={setOldRes}
+                picked={pOld} setPicked={setPOld} label="Old / phased-out part" color="amber"/>
+              <div style={{paddingTop:22,fontSize:20,color:"#D97706",fontWeight:700,flexShrink:0}}>→</div>
+              <PickBox q={newQ} setQ={setNewQ} res={newRes} setRes={setNewRes}
+                picked={pNew} setPicked={setPNew} label="New / replacement part" color="green"/>
+            </div>
+            <button disabled={!pOld||!pNew||pOld?.pn===pNew?.pn} onClick={addPair}
+              style={{width:"100%",padding:"9px",background:(!pOld||!pNew)?"#CBD5E1":"#0B1D3A",color:"white",
+                border:"none",borderRadius:7,fontSize:13,fontWeight:700,
+                cursor:(!pOld||!pNew)?"not-allowed":"pointer",transition:"background 0.15s"}}>
+              + Add Rule
+            </button>
+          </div>
+
+          {/* Existing rules */}
+          <div style={{fontWeight:700,fontSize:11,color:"#475569",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.06em"}}>
+            Active Rules ({pairs.length})
+          </div>
+          {pairs.length===0 ? (
+            <div style={{textAlign:"center",padding:"24px",color:"#94A3B8",fontSize:13,background:"#F8FAFC",borderRadius:8,border:"1px dashed #E2E8F0"}}>
+              No rules yet — add one above.
+            </div>
+          ) : pairs.map(({oldPn,newPn,id})=>{
+            const op=findP(oldPn), np=findP(newPn);
+            return(
+              <div key={id} style={{display:"grid",gridTemplateColumns:"1fr 28px 1fr 32px",gap:8,
+                padding:"10px 12px",marginBottom:6,background:"white",border:"1px solid #E2E8F0",
+                borderRadius:8,alignItems:"center"}}>
+                <div>
+                  <code style={{fontSize:12,fontWeight:700,color:"#92400E",textDecoration:"line-through"}}>{oldPn}</code>
+                  <div style={{fontSize:11,color:"#78350F",marginTop:1}}>{op?.desc?.substring(0,46)||<span style={{color:"#94A3B8",fontStyle:"italic"}}>not in current catalog</span>}</div>
+                  {op?.price&&<div style={{fontSize:10,color:"#94A3B8"}}>${op.price?.toFixed(2)}</div>}
+                </div>
+                <div style={{textAlign:"center",color:"#D97706",fontWeight:800,fontSize:16}}>→</div>
+                <div>
+                  <code style={{fontSize:12,fontWeight:700,color:"#065F46"}}>{newPn}</code>
+                  <div style={{fontSize:11,color:"#047857",marginTop:1}}>{np?.desc?.substring(0,46)||<span style={{color:"#EF4444",fontStyle:"italic"}}>⚠ not found in catalog</span>}</div>
+                  {np?.price&&<div style={{fontSize:10,color:"#94A3B8"}}>${np.price?.toFixed(2)} · {np.cat?.substring(0,28)}</div>}
+                </div>
+                <button onClick={()=>setPairs(prev=>prev.filter(p=>p.id!==id))}
+                  style={{width:28,height:28,background:"#FEF2F2",color:"#EF4444",border:"1px solid #FECACA",
+                    borderRadius:5,cursor:"pointer",fontWeight:700,fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div style={{padding:"12px 16px",borderTop:"1px solid #E2E8F0",display:"flex",gap:8,flexShrink:0,background:"#FAFBFF"}}>
+          <div style={{flex:1,fontSize:11,color:"#64748B",alignSelf:"center"}}>
+            Rules apply immediately to new quotes and the Node Wizard. They are session-only — to persist them, export prices.json from Admin.
+          </div>
+          <button onClick={onClose} style={{padding:"8px 16px",border:"1px solid #E2E8F0",borderRadius:7,background:"white",fontSize:13,fontWeight:600,cursor:"pointer",color:"#475569"}}>Cancel</button>
+          <button onClick={save} style={{padding:"8px 20px",background:"#0B1D3A",border:"none",borderRadius:7,color:"white",fontSize:14,fontWeight:700,cursor:"pointer"}}>
+            ✅ Save ({pairs.length})
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function QuoteApp(){
   const[qn,setQn]=useState("");const[cust,setCust]=useState("");const[cont,setCont]=useState("");
   const[addr,setAddr]=useState("");const[phone,setPhone]=useState("");const[email,setEmail]=useState("");
@@ -1719,11 +1871,13 @@ export default function QuoteApp(){
   const[showAdmin,setShowAdmin]=useState(false);
   const[showImport,setShowImport]=useState(false);
   const[showCustom,setShowCustom]=useState(false);
+  const[showReplace,setShowReplace]=useState(false);
 
   // Dynamic price data — loads from public/prices.json, falls back to embedded
   const[priceList,setPriceList]=useState(PRICE_LIST_FALLBACK);
   const[discounts,setDiscounts]=useState(DISCOUNTS_FALLBACK);
   const[services,setServices]=useState(SVC_FALLBACK);
+  const[replacements,setReplacements]=useState({});
   const[pricesMeta,setPricesMeta]=useState({version:"3.21",updated:"(embedded)"});
 
   useEffect(()=>{
@@ -1732,8 +1886,9 @@ export default function QuoteApp(){
       .then(d=>{
         if(d?.priceList?.length){
           setPriceList(d.priceList);
-          if(d.discounts?.length) setDiscounts(d.discounts);
-          if(d.services?.length)  setServices(d.services);
+          if(d.discounts?.length)  setDiscounts(d.discounts);
+          if(d.services?.length)   setServices(d.services);
+          if(d.replacements)       setReplacements(d.replacements);
           setPricesMeta({version:d.version||"",updated:d.updated||""});
         }
       })
@@ -1915,6 +2070,7 @@ export default function QuoteApp(){
       {showWizard && (
         <NodeWizard
           region={reg} custType={ct} dealReg={dr}
+          replacements={replacements}
           onAddLines={addWizardLines}
           onClose={()=>setShowWizard(false)}
         />
@@ -1950,6 +2106,13 @@ export default function QuoteApp(){
         onClose={()=>setShowCustom(false)}
       />}
 
+      {showReplace && <ReplaceModal
+        priceList={priceList} services={services}
+        replacements={replacements}
+        onSave={(r)=>{ setReplacements(r); setShowReplace(false); }}
+        onClose={()=>setShowReplace(false)}
+      />}
+
       {/* NAV */}
       <div style={{background:N,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}>
         <div style={{display:"flex",alignItems:"center",gap:16}}>
@@ -1962,27 +2125,21 @@ export default function QuoteApp(){
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
-          {[["🔗 HubSpot",false]].map(([l,p])=>(
-            <button key={l} style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:p?A:"#1E3A5F",color:p?"white":"#94A3B8",border:"none"}}>{l}</button>
-          ))}
-          <button onClick={()=>setShowImport(true)}
+          <button style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:"#1E3A5F",color:"#94A3B8",border:"none"}}>🔗 HubSpot</button>
+          <button onClick={()=>setShowReplace(true)}
             style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
-            📥 Import PDF
+            🔄 Replacements{Object.keys(replacements).length>0?` (${Object.keys(replacements).length})`:""}
           </button>
-          <button onClick={exportExcel}
-            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
-            ⬇ Excel
+          <button onClick={()=>setShowImport(true)}
+            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",
+              background:"#059669",color:"white",border:"none",
+              boxShadow:"0 0 0 2px #10B98155"}}>
+            📥 Import PDF
           </button>
           <button onClick={()=>setShowAdmin(true)}
             style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",
               background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
             ⚙ Admin
-          </button>
-          <button onClick={exportPdf} disabled={exporting}
-            style={{padding:"6px 16px",borderRadius:5,fontSize:14,fontWeight:700,cursor:exporting?"wait":"pointer",
-              background:exporting?"#92400E":"#D97706",color:"white",border:"none",opacity:exporting?0.8:1,
-              display:"flex",alignItems:"center",gap:4}}>
-            {exporting ? "⏳ Generating..." : "⬇ Export PDF"}
           </button>
         </div>
       </div>
@@ -2046,16 +2203,31 @@ export default function QuoteApp(){
                 <div style={{position:"absolute",zIndex:200,top:"100%",left:0,right:0,background:"white",border:`1px solid ${B}`,borderRadius:7,boxShadow:"0 8px 24px rgba(0,0,0,0.12)",maxHeight:300,overflowY:"auto",marginTop:2}}>
                   {res.map(p=>{
                     const d=getDiscMain(p.cat||"",reg.id,ct,dr,discounts);
+                    const newPn   = replacements[p.pn];
+                    const newProd = newPn ? [...priceList,...services].find(x=>x.pn===newPn) : null;
+                    const actual  = newProd || p; // what actually gets added
                     return(
-                      <div key={p.pn} onClick={()=>addItem(p)} style={{padding:"8px 12px",cursor:"pointer",borderBottom:`1px solid #F8FAFC`,display:"grid",gridTemplateColumns:"108px 1fr auto",gap:8,alignItems:"center"}}
-                        onMouseEnter={e=>e.currentTarget.style.background="#F8FAFC"} onMouseLeave={e=>e.currentTarget.style.background="white"}>
-                        <code style={{fontSize:14,color:N,fontWeight:700}}>{p.pn}</code>
+                      <div key={p.pn} onClick={()=>addItem(actual)}
+                        style={{padding:"8px 12px",cursor:"pointer",borderBottom:`1px solid #F8FAFC`,
+                          display:"grid",gridTemplateColumns:"108px 1fr auto",gap:8,alignItems:"center",
+                          background:newPn?"#FFF7ED":"white"}}
+                        onMouseEnter={e=>e.currentTarget.style.background=newPn?"#FEF3C7":"#F8FAFC"}
+                        onMouseLeave={e=>e.currentTarget.style.background=newPn?"#FFF7ED":"white"}>
                         <div>
-                          <div style={{fontSize:15,color:T}}>{p.desc}</div>
-                          <div style={{fontSize:15,color:"#94A3B8",marginTop:1}}>{p.cat}</div>
+                          <code style={{fontSize:14,color:newPn?"#92400E":N,fontWeight:700,
+                            textDecoration:newPn?"line-through":"none"}}>{p.pn}</code>
+                          {newPn&&<div style={{fontSize:10,color:"#D97706",fontWeight:700}}>→ {newPn}</div>}
+                        </div>
+                        <div>
+                          {newPn&&<div style={{fontSize:10,padding:"1px 5px",background:"#FEF3C7",
+                            color:"#92400E",borderRadius:3,fontWeight:700,display:"inline-block",marginBottom:2}}>
+                            ⚠ REPLACED — adds new PN
+                          </div>}
+                          <div style={{fontSize:15,color:T}}>{actual.desc}</div>
+                          <div style={{fontSize:15,color:"#94A3B8",marginTop:1}}>{actual.cat}</div>
                         </div>
                         <div style={{textAlign:"right",whiteSpace:"nowrap"}}>
-                          <div style={{fontSize:15,fontWeight:700,color:N}}>{p.price?$M(p.price):p.lpString?.substring(0,18)||"—"}</div>
+                          <div style={{fontSize:15,fontWeight:700,color:N}}>{actual.price?$M(actual.price):actual.lpString?.substring(0,18)||"—"}</div>
                           {d>0&&p.price>0&&<div style={{fontSize:15,color:"#10B981"}}>-{PM(d)}</div>}
                         </div>
                       </div>
@@ -2084,13 +2256,36 @@ export default function QuoteApp(){
                 {lines.map(l=>{
                   const def=getDiscMain(l.cat,reg.id,ct,dr,discounts),ov=Math.abs(l.discount-def)>0.001;
                   const cp=l.listPrice*l.qty*(1-l.discount);
+                  const newPn   = replacements[l.pn];
+                  const newProd = newPn ? [...priceList,...services].find(x=>x.pn===newPn) : null;
                   return(
-                    <div key={l.id} style={{display:"grid",gridTemplateColumns:"108px 1fr 62px 86px 80px 94px 22px",gap:5,padding:"6px 5px",borderBottom:`1px solid #F8FAFC`,alignItems:"center"}}
-                      onMouseEnter={e=>e.currentTarget.style.background="#FAFBFF"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                      <code style={{fontSize:15,color:N,fontWeight:700}}>{l.pn}</code>
+                    <div key={l.id} style={{display:"grid",gridTemplateColumns:"108px 1fr 62px 86px 80px 94px 22px",gap:5,padding:"6px 5px",borderBottom:`1px solid #F8FAFC`,alignItems:"center",background:newPn?"#FFFBEB":"transparent"}}
+                      onMouseEnter={e=>e.currentTarget.style.background=newPn?"#FEF3C7":"#FAFBFF"}
+                      onMouseLeave={e=>e.currentTarget.style.background=newPn?"#FFFBEB":"transparent"}>
+                      <code style={{fontSize:15,color:newPn?"#92400E":N,fontWeight:700,
+                        textDecoration:newPn?"line-through":"none"}}>{l.pn}</code>
                       <div>
                         <div style={{fontSize:14,color:T,lineHeight:1.3}}>{l.desc}</div>
                         <div style={{fontSize:14,color:"#94A3B8",marginTop:1}}>{l.site?<span style={{color:"#3B82F6",fontWeight:600}}>📍{l.site} · </span>:""}{l.cat}</div>
+                        {newPn&&(
+                          <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3}}>
+                            <span style={{fontSize:10,padding:"1px 6px",background:"#FEF3C7",color:"#92400E",borderRadius:3,fontWeight:700}}>
+                              ⚠ Replaced by {newPn}
+                            </span>
+                            <button onClick={()=>{
+                              if(newProd){
+                                const disc=getDiscMain(newProd.cat,reg.id,ct,dr,discounts);
+                                upd(l.id,"pn",newProd.pn); upd(l.id,"desc",newProd.desc);
+                                upd(l.id,"cat",newProd.cat); upd(l.id,"listPrice",newProd.price||0);
+                                upd(l.id,"discount",disc);
+                              }
+                            }} style={{fontSize:10,padding:"2px 8px",background:"#D97706",color:"white",
+                              border:"none",borderRadius:3,cursor:newProd?"pointer":"not-allowed",
+                              fontWeight:700,opacity:newProd?1:0.5}}>
+                              Apply → {newPn}
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <input type="number" value={l.qty} min={1} onChange={e=>upd(l.id,"qty",Math.max(1,parseInt(e.target.value)||1))}
                         style={{width:"100%",padding:"2px 4px",border:`1px solid ${B}`,borderRadius:3,fontSize:14,textAlign:"center"}}/>
