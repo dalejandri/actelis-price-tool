@@ -1,11 +1,11 @@
 {
-  "version": "2026-03-09",
-  "updated": "2026-03-09",
+  "version": "2026-03-30",
+  "updated": "2026-03-30",
   "priceList": [
     {
       "pn": "501RG0140",
       "desc": "GL830-8O",
-      "price": 3148,
+      "price": 5444,
       "cat": "A1.1 GL800 Solutions"
     },
     {
