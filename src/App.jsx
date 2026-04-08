@@ -147,6 +147,8 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
     cpeQty:      1,
     ptpSfpPn:    null,
     ptpSfpQty:   2,
+    ptpCablePn:  null,   // ML600 copper/DSL cable
+    ptpCableQty: 1,
     ptpAcc:      {},
     // GL800 / GL900 / GL9000
     headendPn:   null,
@@ -222,6 +224,11 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
       if (sel.ptpSfpPn) {
         const sfp = P(sel.ptpSfpPn);
         if (sfp) items.push({ ...sfp, qty: sel.ptpSfpQty });
+      }
+      // Copper/DSL cables
+      if (sel.ptpCablePn) {
+        const cable = P(sel.ptpCablePn);
+        if (cable) items.push({ ...cable, qty: sel.ptpCableQty });
       }
       // Power supplies
       const psNA = "506R00006", psEU = "506R00006E";
@@ -403,7 +410,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
 
   // ── Step counts per type ─────────────────────────────────────────────────────
   const STEP_LABELS = {
-    PTP_ML600:   ["Type","Unit","Qty & Mode","SFPs","Accessories","Review"],
+    PTP_ML600:   ["Type","Unit","Qty & Mode","SFPs","Cables","Accessories","Review"],
     PTMP_GL800:  ["Type","Headend","CPEs","SFPs","Accessories","Review"],
     PTMP_GL900:  ["Type","Headend","CPEs","SFPs","Accessories","Review"],
     PTMP_GL9000: ["Type","Headend","CPEs","SFPs","Accessories","Review"],
@@ -619,8 +626,50 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
             </div>
           )}
 
-          {/* ── PTP ML600: Step 4 — Accessories ── */}
+          {/* ── PTP ML600: Step 4 — Cables ── */}
           {step === 4 && type === "PTP_ML600" && (
+            <div>
+              <StepHeader title="Copper / DSL Cables" sub="Optional. Select the cable type connecting the ML600 unit to the MDF/terminal block." />
+              <div style={{ marginBottom:10 }}>
+                <button onClick={()=>set("ptpCablePn",null)}
+                  style={{ padding:"8px 14px", borderRadius:7, border:`2px solid ${!sel.ptpCablePn?"#D97706":"#E2E8F0"}`, background:!sel.ptpCablePn?"#FFFBEB":"white", cursor:"pointer", fontSize:13, fontWeight:600, color:"#1A2035" }}>
+                  No cable required
+                </button>
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:12 }}>
+                {[
+                  { pn:"504R20110", label:"Quad DSL  4×RJ-45  10ft / 3m" },
+                  { pn:"504R20140", label:"Quad DSL  4×RJ-45  100ft / 30m" },
+                  { pn:"504R20120", label:"Octal DSL 8×RJ-45  10ft / 3m" },
+                  { pn:"504R20160", label:"Octal DSL 8×RJ-45  100ft / 30m" },
+                  { pn:"504R20180", label:"Octal DSL 8×RJ-45  150ft / 50m" },
+                  { pn:"504R60060", label:"64-pair DIN  US color  25ft" },
+                  { pn:"504R60062", label:"64-pair DIN  US color  100ft" },
+                  { pn:"504R60063", label:"64-pair DIN  US color  150ft" },
+                  { pn:"504R60088", label:"64-pair FCI  US color  100ft" },
+                ].map(opt => (
+                  <button key={opt.pn} onClick={()=>set("ptpCablePn",opt.pn)}
+                    style={{ textAlign:"left", padding:"8px 10px", borderRadius:7, border:`2px solid ${sel.ptpCablePn===opt.pn?A:"#E2E8F0"}`, background:sel.ptpCablePn===opt.pn?"#FFFBEB":"white", cursor:"pointer" }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:"#1A2035" }}>{opt.label}</div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
+                      <code style={{ fontSize:10, color:"#94A3B8" }}>{opt.pn}</code>
+                      <span style={{ fontSize:11, fontWeight:700, color:N }}>{$(P(opt.pn)?.price)}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {sel.ptpCablePn && (
+                <div>
+                  <Label>Cable Quantity</Label>
+                  <Counter v={sel.ptpCableQty} min={1} max={50} set={v=>set("ptpCableQty",v)} />
+                  <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>Tip: qty = number of pairs per end, e.g. 1 octal cable covers 8 pairs.</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── PTP ML600: Step 5 — Accessories ── */}
+          {step === 5 && type === "PTP_ML600" && (
             <div>
               <StepHeader title="Accessories" sub="Optional add-ons. Power supplies qty is automatically set per unit count." />
               {[
@@ -2121,26 +2170,54 @@ export default function QuoteApp(){
           <div style={{borderLeft:"1px solid #1E3A5F",paddingLeft:16}}>
             <div style={{color:"white",fontWeight:700,fontSize:15,lineHeight:1.2}}>Price Quote Tool</div>
             <div style={{color:"#475569",fontSize:10,marginTop:1}}>Price list v{pricesMeta.version} · {pricesMeta.updated}</div>
-            <div style={{padding:"2px 8px",borderRadius:4,background:(SC[stat]||"#888")+"33",color:SC[stat]||"#888",fontSize:15,fontWeight:700,border:`1px solid ${(SC[stat]||"#888")}55`,display:"inline-block",marginTop:2}}>{stat}</div>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginTop:4}}>
+              <div style={{padding:"2px 8px",borderRadius:4,background:(SC[stat]||"#888")+"33",color:SC[stat]||"#888",fontSize:13,fontWeight:700,border:`1px solid ${(SC[stat]||"#888")}55`}}>{stat}</div>
+              <button onClick={()=>{
+                if(lines.length===0&&!qn&&!cust||(window.confirm("Start a new quote? All current data will be cleared."))){
+                  setQn("");setCust("");setCont("");setAddr("");setPhone("");setEmail("");
+                  setQby("");setDt(TDM());setExp(ADM(TDM(),30));
+                  setReg(REGIONS_MAIN[0]);setCt("Reseller");setDr(false);
+                  setPay("Net 30 days");setShip("ExWorks");setStat("New");
+                  setCmts("");setLines([]);setSrch("");
+                  setAShip(false);setACC(false);setATax(false);setTax(6);
+                }
+              }} style={{padding:"2px 10px",borderRadius:4,background:"#1E3A5F",color:"#94A3B8",border:"1px solid #2D4A7A",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="#2D4A7A";e.currentTarget.style.color="white";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="#1E3A5F";e.currentTarget.style.color="#94A3B8";}}>
+                🗒 New Quote
+              </button>
+            </div>
           </div>
         </div>
-        <div style={{display:"flex",gap:8}}>
-          <button style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:"#1E3A5F",color:"#94A3B8",border:"none"}}>🔗 HubSpot</button>
-          <button onClick={()=>setShowReplace(true)}
-            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
-            🔄 Replacements{Object.keys(replacements).length>0?` (${Object.keys(replacements).length})`:""}
-          </button>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          {/* ── User-facing actions ── */}
           <button onClick={()=>setShowImport(true)}
             style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",
               background:"#059669",color:"white",border:"none",
               boxShadow:"0 0 0 2px #10B98155"}}>
             📥 Import PDF
           </button>
-          <button onClick={()=>setShowAdmin(true)}
-            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",
-              background:"#1E3A5F",color:"#94A3B8",border:"none"}}>
-            ⚙ Admin
-          </button>
+
+          {/* ── Admin tools group ── */}
+          <div style={{display:"flex",alignItems:"center",gap:0,background:"#0F2744",borderRadius:6,border:"1px solid #1E3A5F",overflow:"hidden"}}>
+            <div style={{padding:"3px 8px",fontSize:10,fontWeight:700,color:"#475569",borderRight:"1px solid #1E3A5F",textTransform:"uppercase",letterSpacing:"0.06em",whiteSpace:"nowrap"}}>
+              ⚙ Admin
+            </div>
+            <button style={{padding:"6px 12px",fontSize:13,fontWeight:600,cursor:"pointer",background:"transparent",color:"#94A3B8",border:"none",borderRight:"1px solid #1E3A5F"}}
+              title="HubSpot integration (coming soon)">
+              🔗 HubSpot
+            </button>
+            <button onClick={()=>setShowReplace(true)}
+              style={{padding:"6px 12px",fontSize:13,fontWeight:600,cursor:"pointer",background:"transparent",color:Object.keys(replacements).length>0?"#F59E0B":"#94A3B8",border:"none",borderRight:"1px solid #1E3A5F"}}
+              title="Manage part number replacements">
+              🔄{Object.keys(replacements).length>0?` (${Object.keys(replacements).length})`:""}
+            </button>
+            <button onClick={()=>setShowAdmin(true)}
+              style={{padding:"6px 12px",fontSize:13,fontWeight:600,cursor:"pointer",background:"transparent",color:"#94A3B8",border:"none"}}
+              title="Upload price list / manage data">
+              📋 Prices
+            </button>
+          </div>
         </div>
       </div>
 
@@ -2243,10 +2320,32 @@ export default function QuoteApp(){
             </div>
 
             {lines.length===0?(
-              <div style={{textAlign:"center",padding:"30px 0",color:"#94A3B8"}}>
-                <div style={{fontSize:26,marginBottom:5}}>📋</div>
-                <div style={{fontSize:12}}>Search above to add products manually</div>
-                <div style={{fontSize:14,marginTop:2}}>or click <strong>⚡ Node Configurator</strong> to auto-build a BOM</div>
+              <div style={{margin:"8px 0 4px"}}>
+                {/* Two prominent CTA cards side by side */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:8}}>
+                  {/* Manual search CTA */}
+                  <div style={{padding:"16px",background:"#F8FAFC",border:"2px dashed #CBD5E1",borderRadius:10,textAlign:"center"}}>
+                    <div style={{fontSize:28,marginBottom:6}}>🔍</div>
+                    <div style={{fontSize:13,fontWeight:700,color:"#334155",marginBottom:4}}>Search the Catalog</div>
+                    <div style={{fontSize:11,color:"#94A3B8",lineHeight:1.4}}>Type a part number or product name in the search bar above to add individual items</div>
+                  </div>
+                  {/* Wizard CTA — bold highlighted */}
+                  <div onClick={()=>setShowWizard(true)} style={{padding:"16px",background:"linear-gradient(135deg,#0B1D3A,#1E3A5F)",border:"2px solid #D97706",borderRadius:10,textAlign:"center",cursor:"pointer",transition:"transform 0.1s,box-shadow 0.1s",boxShadow:"0 4px 16px rgba(217,119,6,0.25)"}}
+                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(217,119,6,0.4)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 16px rgba(217,119,6,0.25)";}}>
+                    <div style={{fontSize:28,marginBottom:6}}>⚡</div>
+                    <div style={{fontSize:13,fontWeight:800,color:"#FDE68A",marginBottom:4}}>Node Configurator Wizard</div>
+                    <div style={{fontSize:11,color:"#94A3B8",lineHeight:1.4,marginBottom:10}}>Auto-build a complete BOM for PTP · GL800 · GL900 · GL9000 · ML2300 · Switches</div>
+                    <div style={{display:"inline-block",background:"#D97706",color:"white",padding:"5px 18px",borderRadius:20,fontSize:12,fontWeight:700}}>Launch →</div>
+                  </div>
+                </div>
+                {/* Custom item strip */}
+                <div onClick={()=>setShowCustom(true)} style={{padding:"9px 14px",background:"#F8FAFC",border:"1px dashed #CBD5E1",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="#F1F5F9"}
+                  onMouseLeave={e=>e.currentTarget.style.background="#F8FAFC"}>
+                  <div style={{fontSize:12,color:"#64748B"}}>✏️ <strong>Add a custom / non-catalog item</strong> — enter part #, description and price manually</div>
+                  <span style={{fontSize:12,color:"#94A3B8",fontWeight:600,flexShrink:0,marginLeft:8}}>+ Add</span>
+                </div>
               </div>
             ):(
               <div>
@@ -2316,29 +2415,23 @@ export default function QuoteApp(){
               </div>
             )}
 
-            {/* WIZARD LAUNCHER — prominent */}
-            <div onClick={()=>setShowWizard(true)} style={{marginTop:10,padding:"12px 16px",background:"linear-gradient(135deg,#FFFBEB,#FEF3C7)",border:"2px solid #D97706",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",transition:"all 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="linear-gradient(135deg,#FEF3C7,#FDE68A)"}
-              onMouseLeave={e=>e.currentTarget.style.background="linear-gradient(135deg,#FFFBEB,#FEF3C7)"}>
-              <div>
-                <div style={{fontSize:14,fontWeight:800,color:"#92400E"}}>⚡ Node Configurator Wizard</div>
-                <div style={{fontSize:14,color:"#B45309",marginTop:2}}>Auto-build complete BOM for PTP ML600 · PTMP GL800 · GL900 · GL9000 · ML230/ML2300</div>
+            {/* ADD MORE — compact strip shown only when lines already exist */}
+            {lines.length>0&&(
+              <div style={{display:"flex",gap:8,marginTop:10}}>
+                <div onClick={()=>setShowWizard(true)} style={{flex:1,padding:"8px 12px",background:"linear-gradient(135deg,#FFFBEB,#FEF3C7)",border:"1.5px solid #D97706",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="linear-gradient(135deg,#FEF3C7,#FDE68A)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="linear-gradient(135deg,#FFFBEB,#FEF3C7)"}>
+                  <span style={{fontSize:12,fontWeight:700,color:"#92400E"}}>⚡ Node Configurator</span>
+                  <span style={{fontSize:11,color:"#B45309",fontWeight:600}}>+ Add BOM</span>
+                </div>
+                <div onClick={()=>setShowCustom(true)} style={{flex:1,padding:"8px 12px",background:"#F8FAFC",border:"1.5px dashed #CBD5E1",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="#F1F5F9"}
+                  onMouseLeave={e=>e.currentTarget.style.background="#F8FAFC"}>
+                  <span style={{fontSize:12,fontWeight:700,color:"#475569"}}>✏️ Custom Item</span>
+                  <span style={{fontSize:11,color:"#94A3B8",fontWeight:600}}>+ Add</span>
+                </div>
               </div>
-              <div style={{background:A,color:"white",padding:"5px 14px",borderRadius:6,fontSize:15,fontWeight:700,whiteSpace:"nowrap",flexShrink:0}}>
-                Launch →
-              </div>
-            </div>
-
-            {/* CUSTOM LINE ITEM */}
-            <div onClick={()=>setShowCustom(true)} style={{marginTop:8,padding:"10px 16px",background:"#F8FAFC",border:"1.5px dashed #CBD5E1",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="#F1F5F9";e.currentTarget.style.borderColor="#94A3B8";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="#F8FAFC";e.currentTarget.style.borderColor="#CBD5E1";}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:"#475569"}}>✏️ Add Custom / Non-Catalog Item</div>
-                <div style={{fontSize:12,color:"#94A3B8",marginTop:1}}>Quote a product not in the catalog — enter part #, description and price manually</div>
-              </div>
-              <div style={{color:"#64748B",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,marginLeft:12}}>+ Add</div>
-            </div>
+            )}
           </Panel>
 
           {/* FINANCIAL OPTIONS */}
