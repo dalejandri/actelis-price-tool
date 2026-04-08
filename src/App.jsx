@@ -2101,11 +2101,11 @@ export default function QuoteApp(){
   const grand=hwT+shpA+ccA+txA;
   const cg=useMemo(()=>{const g={};lines.forEach(l=>{const k=l.cat.split(" ")[0];(g[k]=g[k]||[]).push(l);});return g;},[lines]);
 
-  const N="#0B1D3A",A="#D97706",B="#E2E8F0",T="#1A2035",M="#64748B";
+  const N="#0B2343",A="#E8600A",B="#E2E8F0",T="#1A2035",M="#64748B";
   const inp={width:"100%",padding:"9px 11px",border:`1px solid ${B}`,borderRadius:5,fontSize:14,color:T,background:"white",outline:"none",boxSizing:"border-box",fontFamily:"inherit"};
 
   return(
-    <div style={{fontFamily:"'DM Sans','Segoe UI',sans-serif",background:"#F4F6FA",minHeight:"100vh",color:T,fontSize:13}}>
+    <div style={{fontFamily:"'DM Sans','Segoe UI',sans-serif",background:"#F0F4F8",minHeight:"100vh",color:T,fontSize:13}}>
 
       {showAdmin && (
         <AdminUpload
@@ -2163,15 +2163,15 @@ export default function QuoteApp(){
       />}
 
       {/* NAV */}
-      <div style={{background:N,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",boxShadow:"0 2px 8px rgba(0,0,0,0.3)"}}>
+      <div style={{background:"white",height:68,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",boxShadow:"0 2px 12px rgba(11,35,67,0.12)",borderBottom:"3px solid #E8600A"}}>
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <img src="https://actelis.com/wp-content/uploads/2021/10/a_logo-1.gif"
-            alt="Actelis" style={{height:38,objectFit:"contain",display:"block"}} />
-          <div style={{borderLeft:"1px solid #1E3A5F",paddingLeft:16}}>
-            <div style={{color:"white",fontWeight:700,fontSize:15,lineHeight:1.2}}>Price Quote Tool</div>
-            <div style={{color:"#475569",fontSize:10,marginTop:1}}>Price list v{pricesMeta.version} · {pricesMeta.updated}</div>
+            alt="Actelis" style={{height:40,objectFit:"contain",display:"block"}} />
+          <div style={{borderLeft:"2px solid #E8600A",paddingLeft:16}}>
+            <div style={{color:"#0B2343",fontWeight:800,fontSize:16,lineHeight:1.2,letterSpacing:"-0.01em"}}>Price Quote Tool</div>
+            <div style={{color:"#94A3B8",fontSize:10,marginTop:1}}>Price list v{pricesMeta.version} · {pricesMeta.updated}</div>
             <div style={{display:"flex",alignItems:"center",gap:8,marginTop:4}}>
-              <div style={{padding:"2px 8px",borderRadius:4,background:(SC[stat]||"#888")+"33",color:SC[stat]||"#888",fontSize:13,fontWeight:700,border:`1px solid ${(SC[stat]||"#888")}55`}}>{stat}</div>
+              <div style={{padding:"2px 8px",borderRadius:4,background:(SC[stat]||"#888")+"18",color:SC[stat]||"#888",fontSize:12,fontWeight:700,border:`1px solid ${(SC[stat]||"#888")}44`}}>{stat}</div>
               <button onClick={()=>{
                 if(lines.length===0&&!qn&&!cust||(window.confirm("Start a new quote? All current data will be cleared."))){
                   setQn("");setCust("");setCont("");setAddr("");setPhone("");setEmail("");
@@ -2181,9 +2181,9 @@ export default function QuoteApp(){
                   setCmts("");setLines([]);setSrch("");
                   setAShip(false);setACC(false);setATax(false);setTax(6);
                 }
-              }} style={{padding:"2px 10px",borderRadius:4,background:"#1E3A5F",color:"#94A3B8",border:"1px solid #2D4A7A",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="#2D4A7A";e.currentTarget.style.color="white";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="#1E3A5F";e.currentTarget.style.color="#94A3B8";}}>
+              }} style={{padding:"3px 11px",borderRadius:4,background:"#F1F5F9",color:"#0B2343",border:"1px solid #CBD5E1",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="#E8600A";e.currentTarget.style.color="white";e.currentTarget.style.borderColor="#E8600A";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="#F1F5F9";e.currentTarget.style.color="#0B2343";e.currentTarget.style.borderColor="#CBD5E1";}}>
                 🗒 New Quote
               </button>
             </div>
@@ -2192,28 +2192,34 @@ export default function QuoteApp(){
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           {/* ── User-facing actions ── */}
           <button onClick={()=>setShowImport(true)}
-            style={{padding:"6px 13px",borderRadius:5,fontSize:14,fontWeight:700,cursor:"pointer",
+            style={{padding:"7px 16px",borderRadius:6,fontSize:13,fontWeight:700,cursor:"pointer",
               background:"#059669",color:"white",border:"none",
-              boxShadow:"0 0 0 2px #10B98155"}}>
+              boxShadow:"0 2px 8px rgba(5,150,105,0.3)"}}>
             📥 Import PDF
           </button>
 
           {/* ── Admin tools group ── */}
-          <div style={{display:"flex",alignItems:"center",gap:0,background:"#0F2744",borderRadius:6,border:"1px solid #1E3A5F",overflow:"hidden"}}>
-            <div style={{padding:"3px 8px",fontSize:10,fontWeight:700,color:"#475569",borderRight:"1px solid #1E3A5F",textTransform:"uppercase",letterSpacing:"0.06em",whiteSpace:"nowrap"}}>
+          <div style={{display:"flex",alignItems:"center",gap:0,background:"#F8FAFC",borderRadius:6,border:"1px solid #E2E8F0",overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+            <div style={{padding:"4px 10px",fontSize:10,fontWeight:800,color:"#94A3B8",borderRight:"1px solid #E2E8F0",textTransform:"uppercase",letterSpacing:"0.08em",whiteSpace:"nowrap",background:"#F1F5F9"}}>
               ⚙ Admin
             </div>
-            <button style={{padding:"6px 12px",fontSize:13,fontWeight:600,cursor:"pointer",background:"transparent",color:"#94A3B8",border:"none",borderRight:"1px solid #1E3A5F"}}
+            <button style={{padding:"7px 12px",fontSize:12,fontWeight:600,cursor:"pointer",background:"transparent",color:"#475569",border:"none",borderRight:"1px solid #E2E8F0"}}
+              onMouseEnter={e=>e.currentTarget.style.background="#F1F5F9"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}
               title="HubSpot integration (coming soon)">
               🔗 HubSpot
             </button>
             <button onClick={()=>setShowReplace(true)}
-              style={{padding:"6px 12px",fontSize:13,fontWeight:600,cursor:"pointer",background:"transparent",color:Object.keys(replacements).length>0?"#F59E0B":"#94A3B8",border:"none",borderRight:"1px solid #1E3A5F"}}
+              style={{padding:"7px 12px",fontSize:12,fontWeight:600,cursor:"pointer",background:"transparent",color:Object.keys(replacements).length>0?"#E8600A":"#475569",border:"none",borderRight:"1px solid #E2E8F0"}}
+              onMouseEnter={e=>e.currentTarget.style.background="#F1F5F9"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}
               title="Manage part number replacements">
-              🔄{Object.keys(replacements).length>0?` (${Object.keys(replacements).length})`:""}
+              🔄 Replacements{Object.keys(replacements).length>0?` (${Object.keys(replacements).length})`:""}
             </button>
             <button onClick={()=>setShowAdmin(true)}
-              style={{padding:"6px 12px",fontSize:13,fontWeight:600,cursor:"pointer",background:"transparent",color:"#94A3B8",border:"none"}}
+              style={{padding:"7px 12px",fontSize:12,fontWeight:600,cursor:"pointer",background:"transparent",color:"#475569",border:"none"}}
+              onMouseEnter={e=>e.currentTarget.style.background="#F1F5F9"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}
               title="Upload price list / manage data">
               📋 Prices
             </button>
@@ -2452,49 +2458,65 @@ export default function QuoteApp(){
 
         {/* SUMMARY PANEL */}
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <div style={{background:N,borderRadius:9,padding:16,color:"white",position:"sticky",top:14}}>
-            <div style={{fontSize:15,fontWeight:800,letterSpacing:"0.12em",color:"#475569",textTransform:"uppercase",marginBottom:12}}>Quote Summary</div>
-            <div style={{fontSize:14,color:"#94A3B8",marginBottom:3}}>{cust||"—"} · {reg.name} · {ct}</div>
-            {dr&&isNA&&<div style={{fontSize:15,background:"#1C3A1C",color:"#6EE7B7",padding:"2px 7px",borderRadius:3,display:"inline-block",marginBottom:6}}>✓ Deal Registration Active</div>}
-            <div style={{borderTop:"1px solid #1E3A5F",paddingTop:8,marginTop:6}}>
-              <SRM l="Line items" v={lines.length} plain/>
-              <SRM l="List total" v={$M(lstT)} muted/>
-              {lstT>0&&<SRM l="Discount" v={`-${$M(lstT-hwT)} (${PM((lstT-hwT)/lstT)})`} green/>}
-              <SRM l="Hardware subtotal" v={$M(hwT)}/>
-              {aShip&&<SRM l="Shipping" v={$M(shpA)} muted/>}
-              {aCC&&<SRM l="CC Fee" v={$M(ccA)} muted/>}
-              {aTax&&isNA&&<SRM l={`Tax (${tax}%)`} v={$M(txA)} muted/>}
+          <div style={{background:"white",borderRadius:9,border:"1px solid #E2E8F0",overflow:"hidden",position:"sticky",top:14,boxShadow:"0 2px 12px rgba(11,35,67,0.08)"}}>
+            {/* Header bar */}
+            <div style={{background:"#0B2343",padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{fontSize:11,fontWeight:800,letterSpacing:"0.12em",color:"rgba(255,255,255,0.5)",textTransform:"uppercase"}}>Quote Summary</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.7)",fontWeight:500}}>{reg.name} · {ct}</div>
             </div>
-            <div style={{borderTop:"1px solid #1E3A5F",marginTop:8,paddingTop:8,display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
-              <span style={{fontSize:15,color:"#94A3B8",fontWeight:600}}>Grand Total</span>
-              <span style={{fontSize:22,fontWeight:800,color:A}}>{$M(grand)}</span>
+            <div style={{padding:"14px 16px"}}>
+              <div style={{fontSize:13,color:M,marginBottom:10,fontWeight:500}}>{cust||<span style={{color:"#CBD5E1",fontStyle:"italic"}}>No customer yet</span>}</div>
+              {dr&&isNA&&<div style={{fontSize:11,background:"#F0FDF4",color:"#166534",padding:"3px 8px",borderRadius:4,display:"inline-block",marginBottom:8,border:"1px solid #BBF7D0",fontWeight:600}}>✓ Deal Registration Active</div>}
+
+              {/* Stats rows */}
+              <div style={{borderTop:"1px solid #F1F5F9",paddingTop:10}}>
+                <SRM l="Line items" v={lines.length} plain/>
+                <SRM l="List total" v={$M(lstT)} muted/>
+                {lstT>0&&<SRM l="Discount" v={`-${$M(lstT-hwT)} (${PM((lstT-hwT)/lstT)})`} green/>}
+                <SRM l="Hardware subtotal" v={$M(hwT)}/>
+                {aShip&&<SRM l="Shipping" v={$M(shpA)} muted/>}
+                {aCC&&<SRM l="CC Fee" v={$M(ccA)} muted/>}
+                {aTax&&isNA&&<SRM l={`Tax (${tax}%)`} v={$M(txA)} muted/>}
+              </div>
+
+              {/* Grand total */}
+              <div style={{borderTop:"2px solid #E8600A",marginTop:10,paddingTop:10,display:"flex",justifyContent:"space-between",alignItems:"baseline",background:"#FFF8F5",margin:"10px -16px -14px",padding:"10px 16px 14px"}}>
+                <span style={{fontSize:13,color:"#0B2343",fontWeight:700}}>Grand Total</span>
+                <span style={{fontSize:24,fontWeight:800,color:"#E8600A"}}>{$M(grand)}</span>
+              </div>
             </div>
+
+            {/* Category breakdown */}
             {lines.length>0&&(
-              <div style={{marginTop:12}}>
-                <div style={{fontSize:15,fontWeight:800,color:"#475569",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:5}}>By Category</div>
+              <div style={{padding:"12px 16px",borderTop:"1px solid #F1F5F9",background:"#F8FAFC"}}>
+                <div style={{fontSize:10,fontWeight:800,color:"#94A3B8",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>By Category</div>
                 {Object.entries(cg).map(([c,ls])=>{
                   const s=ls.reduce((x,l)=>x+l.listPrice*l.qty*(1-l.discount),0),p=grand>0?s/grand:0;
-                  return<div key={c} style={{marginBottom:4}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:14,marginBottom:2}}>
-                      <span style={{color:"#94A3B8"}}>Type {c}</span>
-                      <span style={{color:"white",fontWeight:600}}>{$M(s)}</span>
+                  return<div key={c} style={{marginBottom:6}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}}>
+                      <span style={{color:M}}>Type {c}</span>
+                      <span style={{color:"#0B2343",fontWeight:600}}>{$M(s)}</span>
                     </div>
-                    <div style={{height:2,background:"#1E3A5F",borderRadius:1}}>
-                      <div style={{height:2,background:A,borderRadius:1,width:`${p*100}%`,transition:"width 0.3s"}}/>
+                    <div style={{height:3,background:"#E2E8F0",borderRadius:2}}>
+                      <div style={{height:3,background:"#E8600A",borderRadius:2,width:`${p*100}%`,transition:"width 0.3s"}}/>
                     </div>
                   </div>;
                 })}
               </div>
             )}
-            <div style={{marginTop:14,display:"flex",flexDirection:"column",gap:6}}>
-              <button onClick={exportPdf} disabled={exporting} style={{width:"100%",padding:8,background:A,color:"white",border:"none",borderRadius:5,fontSize:15,fontWeight:700,cursor:exporting?"wait":"pointer",opacity:exporting?0.7:1}}>{exporting?"⏳ Generating...":"⬇ Export PDF"}</button>
-              <button onClick={exportExcel} style={{width:"100%",padding:8,background:"transparent",color:"#94A3B8",border:"1px solid #1E3A5F",borderRadius:5,fontSize:15,fontWeight:600,cursor:"pointer"}}>⬇ Export Excel</button>
+
+            {/* Export buttons */}
+            <div style={{padding:"12px 16px",borderTop:"1px solid #F1F5F9",display:"flex",flexDirection:"column",gap:6}}>
+              <button onClick={exportPdf} disabled={exporting} style={{width:"100%",padding:"9px",background:"#E8600A",color:"white",border:"none",borderRadius:6,fontSize:13,fontWeight:700,cursor:exporting?"wait":"pointer",opacity:exporting?0.7:1,boxShadow:"0 2px 8px rgba(232,96,10,0.3)"}}>{exporting?"⏳ Generating...":"⬇ Export PDF"}</button>
+              <button onClick={exportExcel} style={{width:"100%",padding:"9px",background:"white",color:"#0B2343",border:"1px solid #CBD5E1",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="#F1F5F9";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="white";}}>⬇ Export Excel</button>
             </div>
           </div>
-          <div style={{background:"white",borderRadius:7,padding:12,border:`1px solid ${B}`,fontSize:10}}>
-            <div style={{fontWeight:700,color:T,marginBottom:7,fontSize:13}}>Quote Info</div>
+          <div style={{background:"white",borderRadius:7,padding:12,border:`1px solid ${B}`,fontSize:10,boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
+            <div style={{fontWeight:700,color:"#0B2343",marginBottom:7,fontSize:12}}>Quote Info</div>
             {[["Date",dt],["Expires",exp],["Payment",pay],["Shipping",ship]].map(([k,v])=>(
-              <div key={k} style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+              <div key={k} style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <span style={{color:"#94A3B8"}}>{k}</span>
                 <span style={{color:T,fontWeight:500}}>{v}</span>
               </div>
@@ -2509,9 +2531,9 @@ export default function QuoteApp(){
 
 function Panel({title,icon,children,actions}){
   return(
-    <div style={{background:"white",borderRadius:8,border:"1px solid #E2E8F0",overflow:"hidden"}}>
-      <div style={{padding:"9px 12px",borderBottom:"1px solid #F1F5F9",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{display:"flex",alignItems:"center",gap:6}}><span>{icon}</span><span style={{fontWeight:700,fontSize:14,color:"#1A2035"}}>{title}</span></div>
+    <div style={{background:"white",borderRadius:8,border:"1px solid #E2E8F0",overflow:"hidden",boxShadow:"0 1px 4px rgba(11,35,67,0.06)"}}>
+      <div style={{padding:"10px 14px",borderBottom:"1px solid #F1F5F9",display:"flex",alignItems:"center",justifyContent:"space-between",background:"#FAFBFF"}}>
+        <div style={{display:"flex",alignItems:"center",gap:6}}><span>{icon}</span><span style={{fontWeight:700,fontSize:14,color:"#0B2343"}}>{title}</span></div>
         {actions}
       </div>
       <div style={{padding:12}}>{children}</div>
@@ -2519,7 +2541,7 @@ function Panel({title,icon,children,actions}){
   );
 }
 function TogM({v,set}){
-  return<div onClick={()=>set(!v)} style={{width:32,height:17,borderRadius:8,background:v?"#D97706":"#CBD5E1",cursor:"pointer",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+  return<div onClick={()=>set(!v)} style={{width:32,height:17,borderRadius:8,background:v?"#E8600A":"#CBD5E1",cursor:"pointer",position:"relative",transition:"background 0.2s",flexShrink:0}}>
     <div style={{width:13,height:13,borderRadius:"50%",background:"white",position:"absolute",top:2,left:v?17:2,transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}}/>
   </div>;
 }
@@ -2535,7 +2557,7 @@ function FlgM({label,sub,v,set,amt}){
 }
 function SRM({l,v,muted,green,plain}){
   return<div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-    <span style={{fontSize:14,color:muted?"#475569":"#94A3B8"}}>{l}</span>
-    <span style={{fontSize:15,fontWeight:plain?400:600,color:green?"#10B981":muted?"#64748B":"white"}}>{v}</span>
+    <span style={{fontSize:13,color:"#94A3B8"}}>{l}</span>
+    <span style={{fontSize:13,fontWeight:plain?400:600,color:green?"#059669":muted?"#64748B":"#0B2343"}}>{v}</span>
   </div>;
 }
