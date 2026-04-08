@@ -187,6 +187,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
     fanModule:        false,     // 506R30070 (CHS-2000B) or 506R30060 (CHS-200)
     chs200AccKit:     false,     // 510K20230
     streaker:         false,     // 503R20270
+    gl9000CardQty: 1,     // GL901CS subscriber card quantity
     // Fiber Switches
     swFamily:    null,   // "dinrail_l2"|"dinrail_l3"|"rack_l2"|"rack_l3"|"inpole"
     swPn:        null,
@@ -263,16 +264,25 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
         const sfp = P(sel.glSfpPn);
         if (sfp) items.push({ ...sfp, qty: sel.headendQty });
       }
-      // Power supplies per-unit
-      const psuNA = type === "PTMP_GL800" ? "506R00013"  : "506R00008";
-      const psuEU = type === "PTMP_GL800" ? "506R00013E" : "506R00008U";
-      if (sel.glAcc[psuNA] || sel.glAcc[psuEU]) {
-        const psPn = isNA ? psuNA : psuEU;
-        const ps = P(psPn);
-        if (ps) items.push({ ...ps, qty: sel.headendQty + sel.remoteCpeQty });
+      // Power supplies (GL9000 has built-in PSU — skip)
+      if (type !== "PTMP_GL9000") {
+        const psuNA = type === "PTMP_GL800" ? "506R00013"  : "506R00008";
+        const psuEU = type === "PTMP_GL800" ? "506R00013E" : "506R00008U";
+        if (sel.glAcc[psuNA] || sel.glAcc[psuEU]) {
+          const psPn = isNA ? psuNA : psuEU;
+          const ps = P(psPn);
+          if (ps) items.push({ ...ps, qty: sel.headendQty + sel.remoteCpeQty });
+        }
       }
+      // GL9000 subscriber line cards
+      if (type === "PTMP_GL9000" && sel.glAcc["506R61335"]) {
+        const card = P("506R61335");
+        if (card) items.push({ ...card, qty: sel.gl9000CardQty || 1 });
+      }
+      // Remaining accessories
+      const skipPsu = new Set(["506R00013","506R00013E","506R00008","506R00008U","506R61335"]);
       Object.entries(sel.glAcc).forEach(([pn, on]) => {
-        if (!on || pn === psuNA || pn === psuEU) return;
+        if (!on || skipPsu.has(pn)) return;
         const prod = P(pn);
         if (prod) {
           const qty = pn === "510R21080" ? sel.headendQty + sel.remoteCpeQty : 1;
@@ -463,7 +473,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
   const GL800_HDS  = [["GL830 (8-port)", ["501RG0140","501RG0144"]], ["GL830 (16-port)", ["501RG0139","501RG0143"]], ["GL850L (16-port)", ["501RG0134","501RG0135"]]];
   const GL900_HDS  = ["501RG0167","501RG0168","501RG0303","501RG0301","501RG0302","501RG0300"];
   const GL900_CPES = ["506R61245","501S61245E","501S61245U","501S61246","501S61246E","501S61247"];
-  const GL9000_HDS = ["506R61334","506R61342","506R61335"];
+  const GL9000_HDS = ["506R61334","506R61342"];  // GL9110C, GL9104C only — GL901CS is a subscriber card add-on
   const GL9000_CPES= ["506R61337","506R61336"];
 
   const ML230_BUNDLES = [
@@ -825,9 +835,14 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
           {/* ── GL800/900/9000: Step 2 — CPEs ── */}
           {step === 2 && (type === "PTMP_GL800" || type === "PTMP_GL900" || type === "PTMP_GL9000") && (
             <div>
-              <StepHeader title="Select CPE Unit" sub="Remote endpoint unit deployed at customer premises." />
+              <StepHeader title="Select CPE Unit"
+                sub={type==="PTMP_GL800"
+                  ? "GL91/GL91T are the remote CPE units for GL800 deployments — one per subscriber line."
+                  : type==="PTMP_GL9000"
+                  ? "GL93C or GL93C-W remote G.hn CPE units."
+                  : "Remote endpoint unit deployed at customer premises."} />
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:12 }}>
-                {(type === "PTMP_GL900" ? GL900_CPES : type === "PTMP_GL9000" ? GL9000_CPES : GL900_CPES).map(pn =>
+                {(type === "PTMP_GL9000" ? GL9000_CPES : GL900_CPES).map(pn =>
                   <ProdBtn key={pn} pn={pn} selected={sel.cpePn} onSelect={pn=>set("cpePn",pn)} region={region} custType={custType} dealReg={dealReg} />
                 )}
               </div>
@@ -869,14 +884,42 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
           {step === 4 && (type === "PTMP_GL800" || type === "PTMP_GL900" || type === "PTMP_GL9000") && (
             <div>
               <StepHeader title="Accessories" sub="Power supplies are applied per total unit count (headend + CPEs)." />
+
+              {/* GL800 accessories */}
               {type === "PTMP_GL800" && [
                 { pn: isNA?"506R00013":"506R00013E", label:`GL800 Power Supply (${isNA?"NA":"EU"})`, hint:"1 per unit" },
                 { pn: "510R21080", label:"Wall Mount Kit", hint:"1 per unit" },
               ].map(acc => <AccRow key={acc.pn} pn={acc.pn} label={acc.label} hint={acc.hint} checked={!!sel.glAcc[acc.pn]} onChange={v=>setAcc("glAcc",acc.pn,v)} />)}
-              {(type === "PTMP_GL900" || type === "PTMP_GL9000") && [
-                { pn: isNA?"506R00008":(region?.id===1?"506R00008U":"506R00008"), label:`GL900 Power Supply (${isNA?"NA":"EU/UK"})`, hint:"1 per unit" },
-                { pn: "510R21080", label:"Wall Mount Kit", hint:"1 per unit" },
-              ].map(acc => <AccRow key={acc.pn} pn={acc.pn} label={acc.label} hint={acc.hint} checked={!!sel.glAcc[acc.pn]} onChange={v=>setAcc("glAcc",acc.pn,v)} />)}
+
+              {/* GL900 accessories */}
+              {type === "PTMP_GL900" && (()=>{
+                // UK is EMEA region — UK-specific PSU variant
+                const isUK = region?.name==="EMEA" && false; // UK not a separate region in current config
+                const psuPn = isNA ? "506R00008" : "506R00008U"; // U suffix = UK/EU variant
+                return [
+                  { pn: psuPn, label:`GL900 Power Supply (${isNA?"NA":"EU/UK"})`, hint:"1 per unit" },
+                  { pn: "510R21080", label:"Wall Mount Kit", hint:"1 per unit" },
+                ].map(acc => <AccRow key={acc.pn} pn={acc.pn} label={acc.label} hint={acc.hint} checked={!!sel.glAcc[acc.pn]} onChange={v=>setAcc("glAcc",acc.pn,v)} />);
+              })()}
+
+              {/* GL9000 accessories — headend is 48VDC built-in, no external PSU needed */}
+              {type === "PTMP_GL9000" && (
+                <>
+                  <div style={{padding:"10px 12px",background:"#F0FDF4",borderRadius:7,border:"1px solid #BBF7D0",marginBottom:10,fontSize:12,color:"#15803D",fontWeight:600}}>
+                    ✓ GL9110C / GL9104C have built-in 48VDC power — no external PSU required.
+                  </div>
+                  <AccRow pn="506R61335" label="GL901CS Subscriber Line Card" hint="Add-on card — 1 per subscriber connection"
+                    checked={!!sel.glAcc["506R61335"]} onChange={v=>setAcc("glAcc","506R61335",v)} />
+                  {sel.glAcc["506R61335"] && (
+                    <div style={{marginLeft:12,marginTop:6}}>
+                      <Label>GL901CS Quantity</Label>
+                      <Counter v={sel.gl9000CardQty||1} min={1} max={32} set={v=>setSel(prev=>({...prev,gl9000CardQty:v}))} />
+                    </div>
+                  )}
+                  <AccRow pn="510R21080" label="Wall Mount Kit" hint="1 per unit"
+                    checked={!!sel.glAcc["510R21080"]} onChange={v=>setAcc("glAcc","510R21080",v)} />
+                </>
+              )}
             </div>
           )}
 
@@ -1277,7 +1320,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
             const isML530  = sel.swPn === "501RG0530" || sel.swPn === "501RG0252" || sel.swPn === "506R62016" || sel.swPn === "506R62006";
             const selDesc  = P(sel.swPn)?.desc || "";
             const hasPoE   = selDesc.includes("-P") && !selDesc.includes("-P/");
-            const isAC     = selDesc.includes("-AC") || selDesc.includes("AC");
+            const isAC     = /\b(AC|AC-DC)\b/.test(selDesc) || selDesc.toLowerCase().includes(" ac ");
 
             // PSU options for DIN Rail
             const dinPsuOptions = [
