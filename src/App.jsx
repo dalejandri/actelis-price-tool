@@ -2170,8 +2170,7 @@ export default function QuoteApp(){
           <div style={{borderLeft:"2px solid #E8600A",paddingLeft:16}}>
             <div style={{color:"#0B2343",fontWeight:800,fontSize:16,lineHeight:1.2,letterSpacing:"-0.01em"}}>Price Quote Tool</div>
             <div style={{color:"#94A3B8",fontSize:10,marginTop:1}}>Price list v{pricesMeta.version} · {pricesMeta.updated}</div>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginTop:4}}>
-              <div style={{padding:"2px 8px",borderRadius:4,background:(SC[stat]||"#888")+"18",color:SC[stat]||"#888",fontSize:12,fontWeight:700,border:`1px solid ${(SC[stat]||"#888")}44`}}>{stat}</div>
+            <div style={{marginTop:4}}>
               <button onClick={()=>{
                 if(lines.length===0&&!qn&&!cust||(window.confirm("Start a new quote? All current data will be cleared."))){
                   setQn("");setCust("");setCont("");setAddr("");setPhone("");setEmail("");
