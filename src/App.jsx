@@ -228,7 +228,12 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
       // Copper/DSL cables
       if (sel.ptpCablePn) {
         const cable = P(sel.ptpCablePn);
-        if (cable) items.push({ ...cable, qty: sel.ptpCableQty });
+        if (cable) {
+          const ML600_PAIRS={"501RG0218":16,"510KG0065":16,"501RG0238":16,"501RG0115":16,"501RG0111":16,"501RG0254":16};
+          const needs2 = ML600_PAIRS[sel.unitPn]===16;
+          const cableQty = needs2 ? Math.max(2, sel.ptpCableQty) : sel.ptpCableQty;
+          items.push({ ...cable, qty: cableQty });
+        }
       }
       // Power supplies
       const psNA = "506R00006", psEU = "506R00006E";
@@ -627,46 +632,126 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
           )}
 
           {/* ── PTP ML600: Step 4 — Cables ── */}
-          {step === 4 && type === "PTP_ML600" && (
-            <div>
-              <StepHeader title="Copper / DSL Cables" sub="Optional. Select the cable type connecting the ML600 unit to the MDF/terminal block." />
-              <div style={{ marginBottom:10 }}>
-                <button onClick={()=>set("ptpCablePn",null)}
-                  style={{ padding:"8px 14px", borderRadius:7, border:`2px solid ${!sel.ptpCablePn?"#D97706":"#E2E8F0"}`, background:!sel.ptpCablePn?"#FFFBEB":"white", cursor:"pointer", fontSize:13, fontWeight:600, color:"#1A2035" }}>
-                  No cable required
-                </button>
-              </div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:12 }}>
-                {[
-                  { pn:"504R20110", label:"Quad DSL  4×RJ-45  10ft / 3m" },
-                  { pn:"504R20140", label:"Quad DSL  4×RJ-45  100ft / 30m" },
-                  { pn:"504R20120", label:"Octal DSL 8×RJ-45  10ft / 3m" },
-                  { pn:"504R20160", label:"Octal DSL 8×RJ-45  100ft / 30m" },
-                  { pn:"504R20180", label:"Octal DSL 8×RJ-45  150ft / 50m" },
-                  { pn:"504R60060", label:"64-pair DIN  US color  25ft" },
-                  { pn:"504R60062", label:"64-pair DIN  US color  100ft" },
-                  { pn:"504R60063", label:"64-pair DIN  US color  150ft" },
-                  { pn:"504R60088", label:"64-pair FCI  US color  100ft" },
-                ].map(opt => (
-                  <button key={opt.pn} onClick={()=>set("ptpCablePn",opt.pn)}
-                    style={{ textAlign:"left", padding:"8px 10px", borderRadius:7, border:`2px solid ${sel.ptpCablePn===opt.pn?A:"#E2E8F0"}`, background:sel.ptpCablePn===opt.pn?"#FFFBEB":"white", cursor:"pointer" }}>
-                    <div style={{ fontSize:12, fontWeight:600, color:"#1A2035" }}>{opt.label}</div>
-                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
-                      <code style={{ fontSize:10, color:"#94A3B8" }}>{opt.pn}</code>
-                      <span style={{ fontSize:11, fontWeight:700, color:N }}>{$(P(opt.pn)?.price)}</span>
+          {step === 4 && type === "PTP_ML600" && (()=>{
+            // ── Cable compatibility map derived from Access AutoRepeaterInfo NumPairs field ──
+            // ML600 naming: ML6{pairs}{suffix}, e.g. ML622=2p, ML638=8p, ML6916=16p
+            // Access SQL rule: NumPairs < 8  → Quad cables only
+            //                  NumPairs >= 8 → Octal cables (NumPairs <> 4)
+            //                  ML650SV       → fiber switch, no copper pairs
+            const ML600_PAIRS = {
+              // 2-pair units
+              "501RG0016":2,"501RG0240":2,"501RG3240":2,"501RG0121":2,
+              // 4-pair units
+              "501RG0046":4,"510KG6241":4,"501RG0122":4,
+              "501RG0216":4,"501RG0116":4,"501RG0076":4,
+              "501RG0220":4,"501RG3230":4,"501RG3255":4,
+              "501RG3355":4,"501RG3358":4,"501RG0232":4,"501RG0106":4,
+              // 8-pair units
+              "501RG0067":8,"510KG6381":8,"501S20394":8,
+              "501RG0217":8,"510KG0064":8,
+              "501RG0077":8,"501RG0477":8,
+              "501RG3275":8,"501RG0221":8,"501RG3231":8,"501RG0236":8,
+              "501RG3375":8,"501RG3378":8,
+              "501RG0259":8,"501RG0253":8,
+              // 16-pair units (need 2× octal cables)
+              "501RG0218":16,"510KG0065":16,
+              "501RG0238":16,"501RG0115":16,"501RG0111":16,"501RG0254":16,
+              // fiber/special — no copper pairs
+              "501RG0078":0,
+            };
+
+            const ALL_CABLES = {
+              quad: [
+                { pn:"504R20110", label:"Quad DSL · 4×RJ-45 · 10ft / 3m",   hint:"covers 4 pairs" },
+                { pn:"504R20140", label:"Quad DSL · 4×RJ-45 · 100ft / 30m", hint:"covers 4 pairs" },
+              ],
+              octal: [
+                { pn:"504R20120", label:"Octal DSL · 8×RJ-45 · 10ft / 3m",   hint:"covers 8 pairs" },
+                { pn:"504R20160", label:"Octal DSL · 8×RJ-45 · 100ft / 30m", hint:"covers 8 pairs" },
+                { pn:"504R20180", label:"Octal DSL · 8×RJ-45 · 150ft / 50m", hint:"covers 8 pairs" },
+              ],
+            };
+
+            const numPairs  = ML600_PAIRS[sel.unitPn] ?? null;
+            const isFiber   = numPairs === 0;
+            const isSmall   = numPairs !== null && numPairs < 8;   // 2 or 4 pair → quad only
+            const isLarge   = numPairs !== null && numPairs >= 8;  // 8 or 16 pair → octal
+            const needsTwo  = numPairs === 16;                     // 16p → 2 octal cables
+
+            const availCables = isFiber ? [] : isSmall ? ALL_CABLES.quad : isLarge ? ALL_CABLES.octal : [...ALL_CABLES.quad, ...ALL_CABLES.octal];
+
+            // Auto-clear invalid selection when unit changes
+            const cableValid = !sel.ptpCablePn || availCables.some(c=>c.pn===sel.ptpCablePn);
+
+            return(
+              <div>
+                <StepHeader
+                  title="Copper / DSL Cables"
+                  sub={
+                    isFiber   ? "ML650SV is a fiber-only unit — no copper cables apply." :
+                    numPairs  ? `${sel.unitPn ? P(sel.unitPn)?.desc : ""} has ${numPairs} copper pairs — showing compatible cables only.` :
+                    "Select cables for the copper interface. Choose unit first to filter compatible options."
+                  }
+                />
+
+                {isFiber ? (
+                  <div style={{padding:"14px",background:"#F0F9FF",borderRadius:8,border:"1px solid #BAE6FD",color:"#0369A1",fontSize:12}}>
+                    ℹ️ ML650SV is a fiber switch — it connects via SFP only. No copper cables needed.
+                  </div>
+                ) : (
+                  <>
+                    {numPairs && (
+                      <div style={{marginBottom:10,padding:"8px 12px",background:isSmall?"#FFF7ED":"#F0FDF4",borderRadius:6,border:`1px solid ${isSmall?"#FED7AA":"#BBF7D0"}`,fontSize:11,color:isSmall?"#92400E":"#166534",fontWeight:600}}>
+                        {isSmall
+                          ? `⚠ ${numPairs}-pair unit — Quad cables only (4×RJ-45 connector)`
+                          : needsTwo
+                          ? `ℹ 16-pair unit — requires 2× Octal cables (one per 8 pairs)`
+                          : `✓ 8-pair unit — Octal cables (8×RJ-45 connector)`}
+                      </div>
+                    )}
+
+                    <div style={{marginBottom:10}}>
+                      <button onClick={()=>set("ptpCablePn",null)}
+                        style={{padding:"7px 14px",borderRadius:7,border:`2px solid ${!sel.ptpCablePn?"#E8600A":"#E2E8F0"}`,background:!sel.ptpCablePn?"#FFF7F5":"white",cursor:"pointer",fontSize:12,fontWeight:600,color:"#1A2035"}}>
+                        No cable required
+                      </button>
                     </div>
-                  </button>
-                ))}
+
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}}>
+                      {availCables.map(opt=>(
+                        <button key={opt.pn} onClick={()=>set("ptpCablePn",opt.pn)}
+                          style={{textAlign:"left",padding:"9px 11px",borderRadius:7,border:`2px solid ${sel.ptpCablePn===opt.pn?A:"#E2E8F0"}`,background:sel.ptpCablePn===opt.pn?"#FFF7F5":"white",cursor:"pointer"}}>
+                          <div style={{fontSize:12,fontWeight:600,color:"#1A2035"}}>{opt.label}</div>
+                          <div style={{display:"flex",justifyContent:"space-between",marginTop:3,alignItems:"center"}}>
+                            <code style={{fontSize:10,color:"#94A3B8"}}>{opt.pn}</code>
+                            <div style={{textAlign:"right"}}>
+                              <span style={{fontSize:11,fontWeight:700,color:N}}>{$(P(opt.pn)?.price)}</span>
+                              <span style={{fontSize:9,color:"#94A3B8",marginLeft:4}}>{opt.hint}</span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {sel.ptpCablePn && cableValid && (
+                      <div>
+                        <Label>{needsTwo?"Cable Quantity (min 2 for 16-pair unit)":"Cable Quantity"}</Label>
+                        <Counter v={sel.ptpCableQty} min={needsTwo?2:1} max={50} set={v=>set("ptpCableQty",v)} />
+                        {needsTwo && sel.ptpCableQty < 2 &&
+                          <div style={{fontSize:11,color:"#EF4444",marginTop:4}}>⚠ 16-pair unit needs at least 2 octal cables (1 per 8 pairs)</div>
+                        }
+                      </div>
+                    )}
+                    {sel.ptpCablePn && !cableValid && (
+                      <div style={{padding:"8px 12px",background:"#FEF2F2",borderRadius:6,border:"1px solid #FECACA",fontSize:11,color:"#B91C1C"}}>
+                        ⚠ Previously selected cable is not compatible with this unit. Please choose again.
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-              {sel.ptpCablePn && (
-                <div>
-                  <Label>Cable Quantity</Label>
-                  <Counter v={sel.ptpCableQty} min={1} max={50} set={v=>set("ptpCableQty",v)} />
-                  <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>Tip: qty = number of pairs per end, e.g. 1 octal cable covers 8 pairs.</div>
-                </div>
-              )}
-            </div>
-          )}
+            );
+          })()}
 
           {/* ── PTP ML600: Step 5 — Accessories ── */}
           {step === 5 && type === "PTP_ML600" && (
