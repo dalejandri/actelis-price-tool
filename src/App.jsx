@@ -585,17 +585,17 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
                   <div>
                     <Label>CO End — Qty (sites)</Label>
-                    <Counter v={sel.coQty} min={1} max={99} set={v=>set("coQty",v)} />
+                    <Counter v={sel.coQty} min={1} max={9999} set={v=>set("coQty",v)} />
                   </div>
                   <div>
                     <Label>CPE End — Qty (sites)</Label>
-                    <Counter v={sel.cpeQty} min={1} max={99} set={v=>set("cpeQty",v)} />
+                    <Counter v={sel.cpeQty} min={1} max={9999} set={v=>set("cpeQty",v)} />
                   </div>
                 </div>
               ) : (
                 <div>
                   <Label>Quantity</Label>
-                  <Counter v={sel.coQty} min={1} max={999} set={v=>set("coQty",v)} />
+                  <Counter v={sel.coQty} min={1} max={9999} set={v=>set("coQty",v)} />
                 </div>
               )}
               {sel.unitPn && (
@@ -634,7 +634,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               {sel.ptpSfpPn && (
                 <div style={{ marginTop:8 }}>
                   <Label>SFP Quantity</Label>
-                  <Counter v={sel.ptpSfpQty} min={1} max={99} set={v=>set("ptpSfpQty",v)} />
+                  <Counter v={sel.ptpSfpQty} min={1} max={9999} set={v=>set("ptpSfpQty",v)} />
                   <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>Tip: 2 SFPs per PTP link (one each end)</div>
                 </div>
               )}
@@ -746,7 +746,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
                     {sel.ptpCablePn && cableValid && (
                       <div>
                         <Label>{needsTwo?"Cable Quantity (min 2 for 16-pair unit)":"Cable Quantity"}</Label>
-                        <Counter v={sel.ptpCableQty} min={needsTwo?2:1} max={50} set={v=>set("ptpCableQty",v)} />
+                        <Counter v={sel.ptpCableQty} min={needsTwo?2:1} max={9999} set={v=>set("ptpCableQty",v)} />
                         {needsTwo && sel.ptpCableQty < 2 &&
                           <div style={{fontSize:11,color:"#EF4444",marginTop:4}}>⚠ 16-pair unit needs at least 2 octal cables (1 per 8 pairs)</div>
                         }
@@ -794,7 +794,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               {sel.headendPn && (
                 <div style={{ marginTop:12 }}>
                   <Label>Headend Quantity</Label>
-                  <Counter v={sel.headendQty} min={1} max={20} set={v=>set("headendQty",v)} />
+                  <Counter v={sel.headendQty} min={1} max={9999} set={v=>set("headendQty",v)} />
                 </div>
               )}
             </div>
@@ -810,7 +810,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               {sel.headendPn && (
                 <div style={{ marginTop:8 }}>
                   <Label>Headend Quantity</Label>
-                  <Counter v={sel.headendQty} min={1} max={20} set={v=>set("headendQty",v)} />
+                  <Counter v={sel.headendQty} min={1} max={9999} set={v=>set("headendQty",v)} />
                 </div>
               )}
             </div>
@@ -826,7 +826,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               {sel.headendPn && (
                 <div>
                   <Label>Headend Quantity</Label>
-                  <Counter v={sel.headendQty} min={1} max={20} set={v=>set("headendQty",v)} />
+                  <Counter v={sel.headendQty} min={1} max={9999} set={v=>set("headendQty",v)} />
                 </div>
               )}
             </div>
@@ -849,7 +849,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               {sel.cpePn && (
                 <div>
                   <Label>CPE Quantity</Label>
-                  <Counter v={sel.remoteCpeQty} min={1} max={256} set={v=>set("remoteCpeQty",v)} />
+                  <Counter v={sel.remoteCpeQty} min={1} max={9999} set={v=>set("remoteCpeQty",v)} />
                 </div>
               )}
             </div>
@@ -961,7 +961,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               {sel.bundlePn && (
                 <div style={{ marginTop:12 }}>
                   <Label>Quantity</Label>
-                  <Counter v={sel.bundleQty} min={1} max={20} set={v=>set("bundleQty",v)} />
+                  <Counter v={sel.bundleQty} min={1} max={9999} set={v=>set("bundleQty",v)} />
                 </div>
               )}
             </div>
@@ -1009,7 +1009,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               <div style={{ marginTop:16, padding:"12px 14px", background:"#EFF6FF", borderRadius:8, border:"1px solid #BFDBFE" }}>
                 <Label>Number of Identical Nodes</Label>
                 <div style={{ fontSize:12, color:"#3B82F6", marginBottom:8 }}>Multiplies all components by this count (for deploying multiple identical chassis).</div>
-                <Counter v={sel.nodeCount} min={1} max={50} set={v=>set("nodeCount",v)} />
+                <Counter v={sel.nodeCount} min={1} max={9999} set={v=>set("nodeCount",v)} />
               </div>
             </div>
           )}
@@ -1103,7 +1103,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
                             ))}
                           </div>
                           <Label>Cable Quantity</Label>
-                          <Counter v={sel.chs200CableQty} min={1} max={64} set={v=>set("chs200CableQty",v)} />
+                          <Counter v={sel.chs200CableQty} min={1} max={9999} set={v=>set("chs200CableQty",v)} />
                           <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>Tip: MLU-64 needs 8 octal cables; MLU-32 needs 4 octal or 8 quad cables.</div>
                         </div>
                       )}
@@ -1136,7 +1136,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
                 {sel.ml230SfpPn && (
                   <div>
                     <Label>SFP Quantity</Label>
-                    <Counter v={sel.ml230SfpQty} min={1} max={20} set={v=>set("ml230SfpQty",v)} />
+                    <Counter v={sel.ml230SfpQty} min={1} max={9999} set={v=>set("ml230SfpQty",v)} />
                   </div>
                 )}
               </div>
@@ -1274,7 +1274,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
                 {sel.swPn && (
                   <div style={{ marginTop:12 }}>
                     <Label>Quantity</Label>
-                    <Counter v={sel.swQty} min={1} max={200} set={v=>set("swQty",v)} />
+                    <Counter v={sel.swQty} min={1} max={9999} set={v=>set("swQty",v)} />
                   </div>
                 )}
               </div>
@@ -1306,7 +1306,7 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
               {sel.swSfpPn && (
                 <div>
                   <Label>SFP Quantity (per switch × {sel.swQty} unit{sel.swQty>1?"s":""})</Label>
-                  <Counter v={sel.swSfpQty} min={1} max={28} set={v=>set("swSfpQty",v)} />
+                  <Counter v={sel.swSfpQty} min={1} max={9999} set={v=>set("swSfpQty",v)} />
                   <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>Total SFPs added: <b>{sel.swSfpQty * sel.swQty}</b></div>
                 </div>
               )}
@@ -1541,11 +1541,25 @@ function Label({ children }) {
 }
 
 function Counter({ v, min, max, set }) {
+  const cap = max ?? 9999;
   return (
     <div style={{ display:"flex", alignItems:"center", gap:0, border:"1px solid #E2E8F0", borderRadius:6, overflow:"hidden", width:"fit-content" }}>
-      <button onClick={() => set(Math.max(min, v - 1))} style={{ width:32, height:32, background:"#F8FAFC", border:"none", cursor:"pointer", fontSize:18, color:"#374151", fontWeight:600 }}>−</button>
-      <span style={{ width:44, textAlign:"center", fontSize:14, fontWeight:700, color:"#1A2035" }}>{v}</span>
-      <button onClick={() => set(Math.min(max, v + 1))} style={{ width:32, height:32, background:"#F8FAFC", border:"none", cursor:"pointer", fontSize:18, color:"#374151", fontWeight:600 }}>+</button>
+      <button onClick={() => set(Math.max(min, v - 1))}
+        style={{ width:32, height:32, background:"#F8FAFC", border:"none", cursor:"pointer", fontSize:18, color:"#374151", fontWeight:600, lineHeight:1 }}>−</button>
+      <input
+        type="number" value={v} min={min} max={cap}
+        onChange={e => {
+          const n = parseInt(e.target.value, 10);
+          if (!isNaN(n)) set(Math.min(cap, Math.max(min, n)));
+        }}
+        onBlur={e => { if (e.target.value === "" || isNaN(parseInt(e.target.value))) set(min); }}
+        style={{ width:56, height:32, textAlign:"center", fontSize:14, fontWeight:700, color:"#1A2035",
+          border:"none", borderLeft:"1px solid #E2E8F0", borderRight:"1px solid #E2E8F0",
+          outline:"none", padding:0, background:"white",
+          MozAppearance:"textfield" }}
+      />
+      <button onClick={() => set(Math.min(cap, v + 1))}
+        style={{ width:32, height:32, background:"#F8FAFC", border:"none", cursor:"pointer", fontSize:18, color:"#374151", fontWeight:600, lineHeight:1 }}>+</button>
     </div>
   );
 }
