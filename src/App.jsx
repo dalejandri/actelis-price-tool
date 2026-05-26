@@ -470,7 +470,19 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
   // ── Sub-components ──────────────────────────────────────────────────────────
   const ML600_STD  = ["501RG0016","501RG0046","501RG0067","501RG0076","501RG0077","501RG0078","501RG0106","501RG0111","501RG0115","501RG0116","501RG0121","501RG0122","501RG0217","501RG0218","501RG0238","501RG0253","501RG0254","501RG0259"];
   const ML600D     = ["501RG3230","501RG3231","501RG3240","501RG0232","501RG3255","501RG3256","501RG3355","501RG3356","501RG3358","501RG3376","501RG3378"];
-  const GL800_HDS  = [["GL830 (8-port)", ["501RG0140","501RG0144"]], ["GL830 (16-port)", ["501RG0139","501RG0143"]], ["GL850L (16-port)", ["501RG0134","501RG0135"]]];
+  // GL800: -O suffix = CO/Aggregation headend (SFP uplink), -R suffix = Remote CPE (RJ-45 uplink)
+  // CPEs are matched by port count of the selected headend
+  const GL800_HDS  = [
+    { label:"GL830-8O  · 8-port CO",    pn:"501RG0140", ports:8  },
+    { label:"GL830-16O · 16-port CO",   pn:"501RG0139", ports:16 },
+    { label:"GL850L-16O · 16-port CO",  pn:"501RG0134", ports:16 },
+  ];
+  const GL800_CPES_BY_PORTS = {
+    8:  ["501RG0144"],               // GL830-8R
+    16: ["501RG0143","501RG0135"],   // GL830-16R, GL850L-16R
+  };
+  const gl800Ports = GL800_HDS.find(h=>h.pn===sel.headendPn)?.ports ?? 16;
+  const GL800_CPES = GL800_CPES_BY_PORTS[gl800Ports] ?? ["501RG0143","501RG0135"];
   const GL900_HDS  = ["501RG0167","501RG0168","501RG0303","501RG0301","501RG0302","501RG0300"];
   const GL900_CPES = ["506R61245","501S61245E","501S61245U","501S61246","501S61246E","501S61247"];
   const GL9000_HDS = ["506R61334","506R61342"];  // GL9110C, GL9104C only — GL901CS is a subscriber card add-on
@@ -779,22 +791,33 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
             </div>
           )}
 
-          {/* ── GL800: Step 1 — Headend ── */}
+          {/* ── GL800: Step 1 — Headend (CO unit) ── */}
           {step === 1 && type === "PTMP_GL800" && (
             <div>
-              <StepHeader title="Select GL800 Headend" sub="CO aggregation unit. Choose model based on port count and access direction." />
-              {GL800_HDS.map(([grp, pns]) => (
-                <div key={grp} style={{ marginBottom:12 }}>
-                  <div style={{ fontSize:11, fontWeight:700, color:"#64748B", textTransform:"uppercase", marginBottom:6 }}>{grp}</div>
-                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
-                    {pns.map(pn => <ProdBtn key={pn} pn={pn} selected={sel.headendPn} onSelect={pn=>set("headendPn",pn)} region={region} custType={custType} dealReg={dealReg} />)}
-                  </div>
-                </div>
-              ))}
+              <StepHeader title="Select GL800 CO / Headend"
+                sub="Select the CO aggregation unit (-O suffix = SFP uplink). The matching Remote CPE (-R) will be shown next." />
+              <div style={{ display:"grid", gridTemplateColumns:"1fr", gap:6, marginBottom:12 }}>
+                {GL800_HDS.map(h => (
+                  <button key={h.pn} onClick={()=>{set("headendPn",h.pn); set("cpePn",null);}}
+                    style={{ textAlign:"left", padding:"10px 14px", borderRadius:8,
+                      border:`2px solid ${sel.headendPn===h.pn?"#E8600A":"#E2E8F0"}`,
+                      background:sel.headendPn===h.pn?"#FFF7F5":"white", cursor:"pointer" }}>
+                    <div style={{ fontWeight:700, color:"#0B2343", fontSize:13 }}>{P(h.pn)?.desc ?? h.pn}</div>
+                    <div style={{ fontSize:11, color:"#64748B", marginTop:2 }}>{h.label} · max {h.ports} remote CPEs</div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:4 }}>
+                      <code style={{ fontSize:10, color:"#94A3B8" }}>{h.pn}</code>
+                      <span style={{ fontSize:12, fontWeight:700, color:"#0B2343" }}>{$(P(h.pn)?.price)}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
               {sel.headendPn && (
-                <div style={{ marginTop:12 }}>
+                <div style={{ marginTop:8 }}>
                   <Label>Headend Quantity</Label>
                   <Counter v={sel.headendQty} min={1} max={9999} set={v=>set("headendQty",v)} />
+                  <div style={{ fontSize:11, color:"#64748B", marginTop:4 }}>
+                    Each {P(sel.headendPn)?.desc} supports up to {gl800Ports} remote CPE units.
+                  </div>
                 </div>
               )}
             </div>
@@ -837,19 +860,26 @@ function NodeWizard({ region, custType, dealReg, replacements, onAddLines, onClo
             <div>
               <StepHeader title="Select CPE Unit"
                 sub={type==="PTMP_GL800"
-                  ? "GL91/GL91T are the remote CPE units for GL800 deployments — one per subscriber line."
+                  ? `GL800 remote CPE units (-R suffix). Matched to the ${P(sel.headendPn)?.desc ?? "selected headend"} — max ${gl800Ports} units per headend.`
                   : type==="PTMP_GL9000"
                   ? "GL93C or GL93C-W remote G.hn CPE units."
                   : "Remote endpoint unit deployed at customer premises."} />
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:12 }}>
-                {(type === "PTMP_GL9000" ? GL9000_CPES : GL900_CPES).map(pn =>
+                {(type === "PTMP_GL800" ? GL800_CPES : type === "PTMP_GL9000" ? GL9000_CPES : GL900_CPES).map(pn =>
                   <ProdBtn key={pn} pn={pn} selected={sel.cpePn} onSelect={pn=>set("cpePn",pn)} region={region} custType={custType} dealReg={dealReg} />
                 )}
               </div>
               {sel.cpePn && (
                 <div>
-                  <Label>CPE Quantity</Label>
-                  <Counter v={sel.remoteCpeQty} min={1} max={9999} set={v=>set("remoteCpeQty",v)} />
+                  <Label>CPE Quantity{type==="PTMP_GL800"?` (max ${gl800Ports * sel.headendQty} for ${sel.headendQty} headend${sel.headendQty>1?"s":""})`:""}</Label>
+                  <Counter v={sel.remoteCpeQty} min={1}
+                    max={type==="PTMP_GL800" ? gl800Ports * sel.headendQty : 9999}
+                    set={v=>set("remoteCpeQty",v)} />
+                  {type==="PTMP_GL800" && sel.remoteCpeQty > gl800Ports * sel.headendQty && (
+                    <div style={{fontSize:11,color:"#EF4444",marginTop:4}}>
+                      ⚠ Exceeds port capacity. Add more headend units or reduce CPE count.
+                    </div>
+                  )}
                 </div>
               )}
             </div>
